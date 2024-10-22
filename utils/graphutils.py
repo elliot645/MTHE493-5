@@ -37,3 +37,23 @@ class Node:
         self.long = long
         self.reinforcement_parameter = reinforcement_parameter
         return
+
+
+def create_county_adjacency_dict(file_path):
+   
+    adjacency_matrix = pd.read_csv(file_path, index_col=0)
+
+    
+    county_adjacency_dict = {}
+
+    for county in adjacency_matrix.index:
+        state = county.split()[-1] 
+        if state not in county_adjacency_dict:
+            county_adjacency_dict[state] = {}
+
+        
+        adjacent_counties = adjacency_matrix.loc[county][adjacency_matrix.loc[county] == 1].index.tolist()
+        county_adjacency_dict[state][county] = adjacent_counties
+
+    return county_adjacency_dict
+
