@@ -1,4 +1,3 @@
-import pandas as pd
 
 class Graph:
     def __init__(self,adj_matrix=None,red_dict={},blue_dict={},population_dict={},lat_dict={},long_dict={},reinforcement_dict={}):
