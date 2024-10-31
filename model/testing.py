@@ -1,7 +1,12 @@
-# import sys
-# sys.path.insert(1, 'utils')
-# from graphutils import create_random_graph, print_graph
+import networkx as nx
+import matplotlib.pyplot as plt
 
-# random_graph = create_random_graph(num_nodes = 5, num_edges = 15)
+G = nx.Graph()
+G.add_edge(1,2) #creates nodes called 1,2
+G.add_edge(2,3)
 
-# print_graph(random_graph,1)
+G.add_edge("A","B") #works with strings
+G.add_edge(print,print) #pass in any object, event print function. can pass to itself also
+
+nx.draw_spring(G,with_labels=True) #draw_spring is a type of graph
+plt.show()
