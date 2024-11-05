@@ -110,3 +110,26 @@ def create_county_adjacency_dict(file_path):
 
     return county_adjacency_dict
 
+def create_voting_data_list(file_path):
+
+    # Read csv into dataframe
+    df = pd.read_csv(file_path)
+
+    # Convert into list of dicts like [{col:val, ..., col:val}, ... , {col:val, ... , col:val}]
+    voting_data = df.to_dict(orient="records")
+
+    return voting_data
+
+def get_voting_data(state, year, voting_data):
+    pass
+
+    """
+    ASSUMPTIONS:
+        1. County population = total county votes?
+        2. What to do about other parties?
+
+    """
+
+
+
+    
