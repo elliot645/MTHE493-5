@@ -58,7 +58,7 @@ class Graph:
         # Define bar width and positions
         bar_width = 0.35
         x = np.arange(len(counties))  # X-axis positions for counties
-
+      
         # Plot bars
         plt.bar(x - bar_width / 2, red_counts, width=bar_width, color='red', label='Red Votes')
         plt.bar(x + bar_width / 2, blue_counts, width=bar_width, color='blue', label='Blue Votes')
