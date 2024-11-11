@@ -1,34 +1,36 @@
-from utils.graphutils import Graph, Node, create_county_adjacency_dict, create_voting_data_list
+from utils.graphutils import Graph, Node, create_county_adjacency_dict, get_voting_data
 import networkx as nx
 import random
 from utils.polya_process import polya
 import time
 import matplotlib.pyplot as plt
 
+# CHANGE MODEL PARAMETERS HERE
 state_name = 'NV'
 start_year = 2000   # Note: year MUST be a multiple of 4
 end_year = 2004
+adj_path = "data\countyadj.csv"
+voting_path = "data\countypres.csv"
 
-st = time.time()*1000
+st = time.time()*1000 
 
-neighbours = create_county_adjacency_dict("data\countyadj.csv")
+neighbours = create_county_adjacency_dict(adj_path)
 t1 = time.time()*1000
 print(f"Reading County Adjacency Data: {int(t1-st)}ms")
 
-voting_data = create_voting_data_list("data\countypres_2000-2020.csv")
+voting_data = get_voting_data(voting_path, state_name, start_year, end_year)
+start_data = voting_data[0]
+end_data = voting_data[1]
 t2 = time.time()*1000
 print(f"Reading County Voting Data: {int(t2-t1)}ms")
-
-# start_profile = get_voting_data(state_name, start_year, voting_data)
-# end_profile = get_voting_data(state_name, end_year, voting_data)
 
 county_graph = Graph()
 
 #set up graph
 for state in neighbours:
     for county in neighbours[state]:
-        population = random.uniform(500,10000)  # population = profile(1)
-        red = int(random.uniform(0,population)) # red = profile(2)
+        population = random.uniform(500,10000)  
+        red = int(random.uniform(0,population))
         blue = population - red
         county_graph.add_node(Node(id=county,state=state,red=red,blue=blue,population=population,neighbours = neighbours[state][county]))
 

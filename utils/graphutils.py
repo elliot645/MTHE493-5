@@ -110,25 +110,57 @@ def create_county_adjacency_dict(file_path):
 
     return county_adjacency_dict
 
-def create_voting_data_list(file_path):
+
+def get_voting_data(file_path, state, start_year, end_year):
 
     # Read csv into dataframe
     df = pd.read_csv(file_path)
+    df = df[df["state_po"] == state]
 
-    # Convert into list of dicts like [{col:val, ..., col:val}, ... , {col:val, ... , col:val}]
-    voting_data = df.to_dict(orient="records")
+    # Subset dataframe to rows of interest
+    start_df = df[df["year"] == start_year]
+    end_df = df[df["year"] == end_year]
 
-    return voting_data
+    # Convert into list of dicts 
+    start_data = start_df.to_dict(orient="records")
+    end_data = end_df.to_dict(orient="records")
 
-def get_voting_data(state, year, voting_data):
-    pass
+    # Dict to hold data for county-year
+    start_dict = {
+        "state" : state,
+        "year" : start_year
+    }
 
-    """
-    ASSUMPTIONS:
-        1. County population = total county votes?
-        2. What to do about other parties?
+    end_dict = {
+        "state" : state,
+        "year" : end_year
+    }
 
-    """
+    # Loop through dataset, add a dict of votes for each county
+    for row in start_data:
+        county = row["county_name"]
+        party = row["party"]
+        votes = row["candidatevotes"]
+
+        # If county not in state_dict, add it as key with empty dict as value
+        if county not in start_dict.keys():
+            start_dict[county] = {"total_votes" : row["totalvotes"]}
+
+        # Add party and votes to county dict
+        start_dict[county][party] = votes 
+
+    # Repeat for end year
+    for row in end_data:
+        county = row["county_name"]
+        party = row["party"]
+        votes = row["candidatevotes"]
+
+        if county not in end_dict.keys():
+            end_dict[county] = {"total_votes" : row["totalvotes"]}
+
+        end_dict[county][party] = votes 
+
+    return start_dict, end_dict 
 
 
 
