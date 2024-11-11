@@ -110,14 +110,13 @@ def create_county_adjacency_dict(file_path):
 
     return county_adjacency_dict
 
-
 def get_voting_data(file_path, state, start_year, end_year):
 
     # Read csv into dataframe
     df = pd.read_csv(file_path)
+    # Subset to state of interest
     df = df[df["state_po"] == state]
-
-    # Subset dataframe to rows of interest
+    # Subset to years of interest
     start_df = df[df["year"] == start_year]
     end_df = df[df["year"] == end_year]
 
@@ -130,7 +129,6 @@ def get_voting_data(file_path, state, start_year, end_year):
         "state" : state,
         "year" : start_year
     }
-
     end_dict = {
         "state" : state,
         "year" : end_year
@@ -141,11 +139,9 @@ def get_voting_data(file_path, state, start_year, end_year):
         county = row["county_name"]
         party = row["party"]
         votes = row["candidatevotes"]
-
         # If county not in state_dict, add it as key with empty dict as value
         if county not in start_dict.keys():
             start_dict[county] = {"total_votes" : row["totalvotes"]}
-
         # Add party and votes to county dict
         start_dict[county][party] = votes 
 
@@ -154,14 +150,16 @@ def get_voting_data(file_path, state, start_year, end_year):
         county = row["county_name"]
         party = row["party"]
         votes = row["candidatevotes"]
-
         if county not in end_dict.keys():
             end_dict[county] = {"total_votes" : row["totalvotes"]}
-
         end_dict[county][party] = votes 
 
     return start_dict, end_dict 
 
 
-
+def get_all_voting_data(file_path):
+    pass
+ 
+def evaluate_model():
+    pass
     
