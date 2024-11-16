@@ -13,7 +13,6 @@ def add_immigrants_to_urns(data, days_in_year=365):
             'red_balls': 0,
             'blue_balls': 0
         }
-
         urns[county_id]['red_balls'] = red_per_day
         urns[county_id]['blue_balls'] = blue_per_day
 
