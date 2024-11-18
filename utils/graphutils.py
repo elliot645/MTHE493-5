@@ -2,6 +2,7 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+import immigration
 
 class Graph:
     def __init__(self):
@@ -85,7 +86,7 @@ class Node:
     def __init__(self,id,state,population=None,red=None,blue=None,lat=None,long=None,reinforcement_parameter=1,neighbours = ()):
         self.id = id
         self.state = state
-        self.population = population
+        self.population = population #will be a list for every age
         self.red = red
         self.blue = blue
         self.lat = lat
@@ -111,7 +112,6 @@ def create_county_adjacency_dict(file_path):
     return county_adjacency_dict
 
 def create_voting_data_list(file_path):
-
     # Read csv into dataframe
     df = pd.read_csv(file_path)
 
@@ -119,6 +119,14 @@ def create_voting_data_list(file_path):
     voting_data = df.to_dict(orient="records")
 
     return voting_data
+
+#FOR JORDAN
+def update_reinforcement_using_daily_birthds(self):
+    #Calculate the number of births for the day
+    #Update self.reinforcement_parameter to this value
+    #With this function, the polya process will call this function at every time step for every node
+    #The reinforcement parameter will be updated at every time step
+    pass
 
 def get_voting_data(state, year, voting_data):
     pass
