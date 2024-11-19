@@ -87,8 +87,8 @@ class Node:
         self.id = id
         self.state = state
         self.population = population #will be a list for every age
-        self.red = red
-        self.blue = blue
+        self.red = red if red else [0] * 100  
+        self.blue = blue if blue else [0] * 100  
         self.lat = lat
         self.long = long
         self.reinforcement_parameter = reinforcement_parameter
@@ -128,6 +128,7 @@ def update_reinforcement_using_daily_birthds(self):
     #The reinforcement parameter will be updated at every time step
     pass
 
+
 def get_voting_data(state, year, voting_data):
     pass
 
@@ -137,6 +138,26 @@ def get_voting_data(state, year, voting_data):
         2. What to do about other parties?
 
     """
+
+def death_data_array_generator():
+    df = pd.read_csv("death_data.csv")
+
+  
+    df = df[['age', 'death_probm', 'death_probf']]
+
+
+    df = df.sort_values('age').reset_index(drop=True)
+
+    death_prob_array = np.zeros(120)  
+    #death prob per year of living is average of male and female at given age
+    for _, row in df.iterrows():
+        death_prob_array[int(row['age'])] = (row['death_probm'] + row['death_probf'])/2
+
+    return death_prob_array
+
+
+
+
 
 
 
