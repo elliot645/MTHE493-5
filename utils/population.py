@@ -28,8 +28,7 @@ age_buckets = {
     "70-74": (range(70, 75), ["AGE7074_TOT"]),
     "75-79": (range(75, 80), ["AGE7579_TOT"]),
     "80-84": (range(80, 85), ["AGE8084_TOT"]),
-    "85+": (range(85, 101), ["AGE85PLUS_TOT"]),  # Maximum age capped at 100
-}
+    "85+": (range(85, 101), ["AGE85PLUS_TOT"]),}
 
 # Process each row
 for index, row in db.iterrows():
@@ -38,7 +37,7 @@ for index, row in db.iterrows():
     county = row.get('CTYNAME')
 
     if not all([year, state, county]):
-        continue  # Skip rows with missing key identifiers
+        continue
 
     # Create or retrieve nested dictionaries
     year_dict = age_data.setdefault(year, {})
@@ -59,7 +58,7 @@ for index, row in db.iterrows():
                 county_dict[age] = county_dict.get(age, 0) + distributed_population
 
 
-#FOR KEDDIE
+#years: 1 = 4/1/2020, 2 = 7/1/2020, 3 = 7/1/2021, 4 = 7/1/2022, 5 = 7/1/2023
 def get_population_data(year, state, county):
     #return a dictionary of the form data[state][county] that returns a population list for that county
     population_data = []
@@ -67,4 +66,3 @@ def get_population_data(year, state, county):
         population_data.append(age_data[year][state][county][i])
     return population_data
 
-print(get_population_data(5, 'Alabama', 'Autauga County'))
