@@ -83,8 +83,9 @@ class Graph:
         return
         
 class Node:
-    def __init__(self,id,state,population=None,red=None,blue=None,lat=None,long=None,reinforcement_parameter=1,neighbours = ()):
+    def __init__(self,id,name,state,population=None,red=None,blue=None,lat=None,long=None,reinforcement_parameter=1,neighbours = ()):
         self.id = id
+        self.name = name
         self.state = state
         self.population = population #will be a list for every age
         self.red = red if red else [0] * 100  
@@ -96,29 +97,40 @@ class Node:
         return
 
 
-
-def create_county_adjacency_dict(file_path):
-   
-    adjacency_matrix = pd.read_csv(file_path, index_col=0)
-    
-    county_adjacency_dict = {}
-
-    for county in adjacency_matrix.index:
-        state = county.split()[-1] 
-        if state not in county_adjacency_dict:
-            county_adjacency_dict[state] = {}
-        
-        adjacent_counties = set(adjacency_matrix.loc[county][adjacency_matrix.loc[county] == 1].index.tolist())
-        county_adjacency_dict[state][county] = adjacent_counties
-
-    return county_adjacency_dict
-
+#--------------------------------------------------------------------------
 
 
 """
 Initialize the graph object
-Input:
-Output: 
-"""    
-def init_graph():
-    pass
+Input: initial votes per county
+Output: graph object
+"""
+def init_graph(start_votes, neighbours, fips_dict):
+
+    # invoke graph constructor
+    graph = Graph()
+
+    # 
+    for state in neighbours:
+        """POTENTIAL ISSUE: COUNTIES WITH SAME NAMES"""
+        for county in neighbours[state]: 
+            # notation
+            name = county[-1:-10]
+            fips = fips_dict[state][name]
+            red = start_votes[fips]["REPUBLICAN"]
+            blue = start_votes[fips]["DEMOCRAT"]
+            population = red + blue
+
+            # add node
+            graph.add_node(Node(
+                id = fips,
+                name = name,
+                state = state,
+                red = red,
+                blue = blue,
+                population = population,
+                neighbours = neighbours[state][county],
+                reinforcement_parameter = 1
+            ))
+
+    

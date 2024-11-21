@@ -1,3 +1,4 @@
+from alternate_utils.global_utils import *
 from alternate_utils.voting_utils import *
 from alternate_utils.graph_utils import *
 from alternate_utils.polya_utils import *
@@ -7,22 +8,26 @@ from alternate_utils.immigration_utils import *
 import numpy as np
 
 
-def run_experiment(start_year, end_year, timestep, voting_df, neighbours):
+def run_experiment(start_year, end_year, timestep, voting_df, neighbours, fips_dict):
 
     # Get initial and final conditions
     start_votes = get_votes(voting_df, start_year)
     end_votes = get_votes(voting_df, end_year)
 
-    # # Initialize graph
-    graph = init_graph()
+    # Initialize graph
+    """FIPS_DICT IS INCOMPLETE""""
+    graph = init_graph(start_votes, neighbours, fips_dict)
 
-    # # Run Polya process
-    polya(graph)
+    # Run Polya process
+    """INCLUDE TIMESTEP"""
+    polya(graph, timestep)
 
     # Get results
+    """UNFINISHED"""
     model_votes = get_model_votes(graph)
 
     # Consolidate results
+    """UNFINISHED"""
     results = consolidate(start_votes, end_votes, model_votes)
 
     # Get model error
@@ -33,6 +38,8 @@ def run_experiment(start_year, end_year, timestep, voting_df, neighbours):
 
 
 if __name__ == "__main__":
+
+    #---------------------------------------------------------------
 
     # Set filepaths 
     voting_path = "data\countypres.csv"
@@ -47,9 +54,7 @@ if __name__ == "__main__":
     # Read and create county adjacency
     neighbours = create_county_adjacency_dict(adj_path)
 
-    #---------------------------------------------------------------------------------
-
-    print(voting_df["county_fips"])
+    #----------------------------------------------------------------
 
     # Model parameters: 
     start_year = 2000
@@ -60,4 +65,4 @@ if __name__ == "__main__":
     results = run_experiment(start_year, end_year, timestep, voting_df, neighbours)
 
     # Print results
-    # print_results(results_path, results, start_year, end_year, timestep)
+    print_results(results_path, results, start_year, end_year, timestep)

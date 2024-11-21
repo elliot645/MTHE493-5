@@ -1,16 +1,6 @@
 import pandas as pd
 
 
-"""
-Read voting csv, do any tidying needed
-Input: filepath to voting data csv
-Output: dataframe containing voting data from 2000 - 2020
-"""
-def read_votes(filepath):
-    dtype = {"county_fips":"Int64"}
-    df = pd.read_csv(filepath, dtype=dtype)
-    return df
-
 
 """
 Get voting numbers for given year
@@ -42,6 +32,7 @@ def get_votes(voting_df, year):
         
     return counties
 
+#--------------------------------------------------------------------------
 
 """
 Get dict of results for each county
@@ -51,6 +42,7 @@ Output: dict of final votes from model
 def get_model_votes(graph):
     pass
 
+#--------------------------------------------------------------------------
 
 """
 Consolidate the three dicts into a printable dict
@@ -60,6 +52,7 @@ Output: dict of results formatted for printing
 def consolidate(start_votes, end_votes, model_votes):
     pass
 
+#--------------------------------------------------------------------------
 
 """
 Calculate error for each county
@@ -80,6 +73,7 @@ def get_error(results):
         results[county]["error"] = error
     return 
 
+#--------------------------------------------------------------------------
 
 """
 Print results to excel 
