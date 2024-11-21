@@ -2,7 +2,8 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-import immigration
+#import immigration
+from . import map_visualization
 
 class Graph:
     def __init__(self):
@@ -22,7 +23,7 @@ class Graph:
             return
         self.node[node_id1].neighbours.add(node_id2)
         self.node[node_id2].neighbours.add(node_id1)
-
+ 
         #Add edge to networkx graph
         self.networkx.add_edge(node_id1,node_id2)
 
@@ -38,8 +39,12 @@ class Graph:
 
         else:
             nx.draw_spring(self.networkx,with_labels=True)
-        
         return
+    
+    def visualize_map(self,states):
+        map_visualization.visualize_state_opinions(states,self)
+        return
+
     
     def graph_node_opinions(self,state=None,title=None):
         plt.figure()
@@ -83,8 +88,9 @@ class Graph:
         return
         
 class Node:
-    def __init__(self,id,state,population=None,red=None,blue=None,lat=None,long=None,reinforcement_parameter=1,neighbours = ()):
-        self.id = id
+    def __init__(self,id,county,state,population=None,red=None,blue=None,lat=None,long=None,reinforcement_parameter=1,neighbours = ()):
+        self.id = id #FIPS ID
+        self.county = county
         self.state = state
         self.population = population #will be a list for every age
         self.red = red
@@ -102,7 +108,7 @@ def create_county_adjacency_dict(file_path):
     county_adjacency_dict = {}
 
     for county in adjacency_matrix.index:
-        state = county.split()[-1] 
+        state = county[-2:] 
         if state not in county_adjacency_dict:
             county_adjacency_dict[state] = {}
         

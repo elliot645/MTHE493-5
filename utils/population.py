@@ -7,7 +7,7 @@ db = pd.read_csv('data/us_county_population_estimates_by_age_2020_to_2023.csv',e
 print(db.head(10))
 
 #FOR KEDDIE
-def get_population_data(state=state_name,year=start_year):
+def get_population_data(state,year):
     #return a dictionary of the form data[state][county] that returns a population list for that county
     population_dict = {}
     return population_dict
