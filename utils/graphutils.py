@@ -111,20 +111,6 @@ def create_county_adjacency_dict(file_path):
 
     return county_adjacency_dict
 
-def create_voting_data_list(file_path):
-    # Read csv into dataframe
-    df = pd.read_csv(file_path)
-    # Subset to state of interest
-    df = df[df["state_po"] == state]
-    # Subset to years of interest
-    start_df = df[df["year"] == start_year]
-    end_df = df[df["year"] == end_year]
-
-    # Convert into list of dicts 
-    start_data = start_df.to_dict(orient="records")
-    end_data = end_df.to_dict(orient="records")
-
-    return voting_data
 
 #FOR JORDAN
 def update_reinforcement_using_daily_birthds(self):
@@ -134,16 +120,6 @@ def update_reinforcement_using_daily_birthds(self):
     #The reinforcement parameter will be updated at every time step
     pass
 
-
-def get_voting_data(state, year, voting_data):
-    pass
-
-    """
-    ASSUMPTIONS:
-        1. County population = total county votes?
-        2. What to do about other parties?
-
-    """
 
 def death_data_array_generator():
     df = pd.read_csv("death_data.csv")
