@@ -2,6 +2,7 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+import immigration
 
 class Graph:
     def __init__(self):
@@ -58,7 +59,7 @@ class Graph:
         # Define bar width and positions
         bar_width = 0.35
         x = np.arange(len(counties))  # X-axis positions for counties
-
+      
         # Plot bars
         plt.bar(x - bar_width / 2, red_counts, width=bar_width, color='red', label='Red Votes')
         plt.bar(x + bar_width / 2, blue_counts, width=bar_width, color='blue', label='Blue Votes')
@@ -85,9 +86,9 @@ class Node:
     def __init__(self,id,state,population=None,red=None,blue=None,lat=None,long=None,reinforcement_parameter=1,neighbours = ()):
         self.id = id
         self.state = state
-        self.population = population
-        self.red = red
-        self.blue = blue
+        self.population = population #will be a list for every age
+        self.red = red if red else [0] * 100  
+        self.blue = blue if blue else [0] * 100  
         self.lat = lat
         self.long = long
         self.reinforcement_parameter = reinforcement_parameter
@@ -110,8 +111,7 @@ def create_county_adjacency_dict(file_path):
 
     return county_adjacency_dict
 
-def get_voting_data(file_path, state, start_year, end_year):
-
+def create_voting_data_list(file_path):
     # Read csv into dataframe
     df = pd.read_csv(file_path)
     # Subset to state of interest
@@ -124,42 +124,47 @@ def get_voting_data(file_path, state, start_year, end_year):
     start_data = start_df.to_dict(orient="records")
     end_data = end_df.to_dict(orient="records")
 
-    # Dict to hold data for county-year
-    start_dict = {
-        "state" : state,
-        "year" : start_year
-    }
-    end_dict = {
-        "state" : state,
-        "year" : end_year
-    }
+    return voting_data
 
-    # Loop through dataset, add a dict of votes for each county
-    for row in start_data:
-        county = row["county_name"]
-        party = row["party"]
-        votes = row["candidatevotes"]
-        # If county not in state_dict, add it as key with empty dict as value
-        if county not in start_dict.keys():
-            start_dict[county] = {"total_votes" : row["totalvotes"]}
-        # Add party and votes to county dict
-        start_dict[county][party] = votes 
-
-    # Repeat for end year
-    for row in end_data:
-        county = row["county_name"]
-        party = row["party"]
-        votes = row["candidatevotes"]
-        if county not in end_dict.keys():
-            end_dict[county] = {"total_votes" : row["totalvotes"]}
-        end_dict[county][party] = votes 
-
-    return start_dict, end_dict 
-
-
-def get_all_voting_data(file_path):
+#FOR JORDAN
+def update_reinforcement_using_daily_birthds(self):
+    #Calculate the number of births for the day
+    #Update self.reinforcement_parameter to this value
+    #With this function, the polya process will call this function at every time step for every node
+    #The reinforcement parameter will be updated at every time step
     pass
- 
-def evaluate_model():
+
+
+def get_voting_data(state, year, voting_data):
     pass
+
+    """
+    ASSUMPTIONS:
+        1. County population = total county votes?
+        2. What to do about other parties?
+
+    """
+
+def death_data_array_generator():
+    df = pd.read_csv("death_data.csv")
+
+  
+    df = df[['age', 'death_probm', 'death_probf']]
+
+
+    df = df.sort_values('age').reset_index(drop=True)
+
+    death_prob_array = np.zeros(120)  
+    #death prob per year of living is average of male and female at given age
+    for _, row in df.iterrows():
+        death_prob_array[int(row['age'])] = (row['death_probm'] + row['death_probf'])/2
+
+    return death_prob_array
+
+
+
+
+
+
+
     
