@@ -1,8 +1,8 @@
-from alternate_model.voting_utils import *
-from alternate_model.graph_utils import *
-from alternate_model.polya_utils import *
-from alternate_model.population_utils import *
-from alternate_model.immigration_utils import *
+from alternate_utils.voting_utils import *
+from alternate_utils.graph_utils import *
+from alternate_utils.polya_utils import *
+from alternate_utils.population_utils import *
+from alternate_utils.immigration_utils import *
 
 import numpy as np
 
