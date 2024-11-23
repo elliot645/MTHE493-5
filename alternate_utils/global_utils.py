@@ -22,6 +22,16 @@ def get_fips_dict(voting_df):
         state : {} for state in pd.unique(voting_df["state_po"]) 
     }
 
+    fips_df = voting_df[(voting_df["year"]==2000) & (voting_df["party"]=="DEMOCRAT")]
+    fips_data = fips_df.to_dict(orient="records")
+    for row in fips_data:
+        state = row["state_po"]
+        state_name = row["state"]
+        county = row["county_name"]
+        fips = row["county_fips"]
+        fips_dict[state][county] = fips
+
+
     return fips_dict
 
 #--------------------------------------------------------------------------
