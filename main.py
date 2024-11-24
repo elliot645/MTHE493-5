@@ -80,4 +80,3 @@ print(f"Running Polya Process: {int(t5-t4)}ms")
 county_graph.graph_node_opinions(state_name)
 
 plt.show()
-
