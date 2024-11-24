@@ -87,9 +87,6 @@ def visualize_state_opinions(state_names):
     edge_color = "#30011E"
     background_color = "#fafafa"
 
-
-
-
     data_breaks = [
         (0.90, "#E20E0E", "90-100% Republican"),   # Dark red
         (0.70, "#E45757", "70-90% Republican"),              # Medium red
@@ -192,4 +189,4 @@ def visualize_state_opinions(state_names):
     plt.axis("off")
     plt.show()
 
-visualize_state_opinions(["Vermont"])
+visualize_state_opinions(["Florida"])
