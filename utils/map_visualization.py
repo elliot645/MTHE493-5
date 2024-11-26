@@ -1,3 +1,5 @@
+DATA_PATH = "C:/Users/ellio/OneDrive - Queen's University/Queen's/4th year fall/493/map_data"
+
 # Import libraries
 import numpy as np
 import pandas as pd
@@ -80,7 +82,7 @@ def get_state_code(state_name):
     return state_codes.get(state_name, "State not found")
 
 
-def visualize_state_opinions(state_names,graph):
+def visualize_state_opinions(graph,state_names=None,image_size=18,title_size=32,legend_size=20,annotation_size=15):
 
     edge_color = "#30011E"
     background_color = "#fafafa"
@@ -100,30 +102,54 @@ def visualize_state_opinions(state_names,graph):
         colors = []
 
         for i, row in county_df.iterrows():
-            for p, c, _ in data_breaks:
-                node = graph.nodes[row['STATEFP']+row['COUNTYFP']]
-                if node.red/(node.red+node.blue) >= p:
-                    colors.append(c)
-                    break
+            if row['STATEFP']+row['COUNTYFP'] in graph.nodes.keys():
+                for p, c, _ in data_breaks:
+                    node = graph.nodes[row['STATEFP']+row['COUNTYFP']]
+                    if node.red+node.blue <= 0:
+                        print(f"{row['STATEFP']+row['COUNTYFP']} has zero red and blue balls")
+                        colors.append("#27d618")
+                        break
+                    # if sum(node.red)/(sum(node.red)+sum(node.blue)) >= p:
+                    #     colors.append(c)
+                    #     break
+                    if node.red/(node.red+node.blue) >= p:
+                        colors.append(c)
+                        break
+            
+            else:
+                print(f"{row['STATEFP']+row['COUNTYFP']} not in graph, but in map data")
+                colors.append("#EBCC34")
+
         return colors
 
     def add_title(state_names):
-        if len(state_names) == 1:
+        if state_names is None:
+            plt.annotate(
+                text="Political Opinions by County for",
+                xy=(0.5, 1.1), xycoords="axes fraction", fontsize=annotation_size, ha="center"
+            )
+
+            plt.annotate(
+                text=f"The United States of America", 
+                xy=(0.5, 1.03), xycoords="axes fraction", fontsize=title_size, ha="center",
+                fontweight="bold"
+            )
+        elif len(state_names) == 1:
             plt.annotate(
                 text="Political Opinions by County for the state of",
-                xy=(0.5, 1.1), xycoords="axes fraction", fontsize=12, ha="center"
+                xy=(0.5, 1.1), xycoords="axes fraction", fontsize=annotation_size, ha="center"
             )
 
             plt.annotate(
                 text=f"{state_names[0]}", 
-                xy=(0.5, 1.03), xycoords="axes fraction", fontsize=26, ha="center",
+                xy=(0.5, 1.03), xycoords="axes fraction", fontsize=title_size, ha="center",
                 fontweight="bold"
             )
 
         elif len(state_names) > 1:
             plt.annotate(
                 text="Political Opinions by County for the states of",
-                xy=(0.5, 1.1), xycoords="axes fraction", fontsize=12, ha="center"
+                xy=(0.5, 1.1), xycoords="axes fraction", fontsize=annotation_size, ha="center"
             )
             text = ""
             for i in range(len(state_names)-1):
@@ -131,17 +157,17 @@ def visualize_state_opinions(state_names,graph):
             text = text + state_names[len(state_names)-1]
             plt.annotate(
                 text=text,
-                xy=(0.5, 1.03), xycoords="axes fraction", fontsize=26, ha="center",
+                xy=(0.5, 1.03), xycoords="axes fraction", fontsize=title_size, ha="center",
                 fontweight="bold"
             )
-    
+
     def add_legend(data_breaks):
         patches = [Patch(facecolor=c, edgecolor=edge_color, label=t) for _, c, t in data_breaks]
 
         leg = plt.legend(
             handles=patches,
             bbox_to_anchor=(0.5, -0.03), loc='center',
-            ncol=10, fontsize=10, columnspacing=0.6,
+            ncol=4, fontsize=legend_size, columnspacing=1,
             handlelength=1, handleheight=1,
             edgecolor=background_color,
             handletextpad=0.4
@@ -150,7 +176,7 @@ def visualize_state_opinions(state_names,graph):
     def add_information():
         plt.annotate(
             "The Polya Network Process Involves removing a ball from an urn's super urn and\n replacing a set number of balls back into its urn of that color (...)",
-            xy=(0.5, -0.08), xycoords="axes fraction", ha="center", va="top", fontsize=12, linespacing=1.8
+            xy=(0.5, -0.08), xycoords="axes fraction", ha="center", va="top", fontsize=annotation_size, linespacing=1.8
         )
 
         # plt.annotate(
@@ -159,27 +185,55 @@ def visualize_state_opinions(state_names,graph):
         #     fontweight="bold"
         # )
 
+    def translate_geometries(df, x, y, scale, rotate):
+        df.loc[:, "geometry"] = df.geometry.translate(yoff=y, xoff=x)
+        center = df.dissolve().centroid.iloc[0]
+        df.loc[:, "geometry"] = df.geometry.scale(xfact=scale, yfact=scale, origin=center)
+        df.loc[:, "geometry"] = df.geometry.rotate(rotate, origin=center)
+        return df
+
+    def adjust_maps(df):
+        df_main_land = df[~df.STATEFP.isin(["02", "15"])]
+        df_alaska = df[df.STATEFP == "02"]
+        df_hawaii = df[df.STATEFP == "15"]
+
+        df_alaska = translate_geometries(df_alaska, 1300000, -4900000, 0.5, 32)
+        df_hawaii = translate_geometries(df_hawaii, 5400000, -1500000, 1, 24)
+
+        return pd.concat([df_main_land, df_alaska, df_hawaii])
+
     sns.set_style({
         "font.family": "serif",
         "figure.facecolor": background_color,
         "axes.facecolor": background_color,
     })
 
-    state_codes = [get_state_code(s) for s in state_names]
+    if state_names is not None:
+        state_codes = [get_state_code(s) for s in state_names]
 
     # Load and prepare geo-data, remove states we don't care about
-    counties = gpd.read_file("C:/Users/ellio/python/MTHE493-5/data/map_data/tl_2024_us_county/")
-    counties = counties[counties.STATEFP.isin(state_codes)]
+    counties = gpd.read_file(DATA_PATH + "/tl_2020_us_county/")
+    if state_names is not None:
+        counties = counties[counties.STATEFP.isin(state_codes)]
+    else:
+        counties = counties[~counties.STATEFP.isin(["72", "69", "60", "66", "78"])]
     counties = counties.set_index("GEOID")
 
-    states = gpd.read_file("C:/Users/ellio/python/MTHE493-5/data/map_data/tl_2024_us_state/")
-    states = states[states.STATEFP.isin(state_codes)]
+    states = gpd.read_file(DATA_PATH + "/tl_2020_us_state/")
+    if state_names is not None:
+        states = states[states.STATEFP.isin(state_codes)]
+    else:
+        states = states[~states.STATEFP.isin(["72", "69", "60", "66", "78"])]
 
     counties = counties.to_crs("ESRI:102003")
     states = states.to_crs("ESRI:102003")
 
+    if state_names is None:
+        counties = adjust_maps(counties)
+        states = adjust_maps(states)    
+
     counties.loc[:, "color"] = create_color(counties, data_breaks)
-    ax = counties.plot(edgecolor=edge_color + "55", color=counties.color, figsize=(20, 20))
+    ax = counties.plot(edgecolor=edge_color + "55", color=counties.color, figsize=(image_size, image_size))
     states.plot(ax=ax, edgecolor=edge_color, color="None", linewidth=1)
 
     add_title(state_names)
@@ -187,4 +241,4 @@ def visualize_state_opinions(state_names,graph):
     add_information()
 
     plt.axis("off")
-    plt.show()
+    #plt.show()

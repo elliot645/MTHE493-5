@@ -41,10 +41,11 @@ class Graph:
             nx.draw_spring(self.networkx,with_labels=True)
         return
     
-    def visualize_map(self,states):
-        map_visualization.visualize_state_opinions(states,self)
+    def visualize_map(self,states=None,image_size=18,title_size=32,legend_size=20,annotation_size=15):
+        if isinstance(states, str):
+            states = [states]
+        map_visualization.visualize_state_opinions(self,states,image_size,title_size,legend_size,annotation_size)
         return
-
     
     def graph_node_opinions(self,state=None,title=None):
         plt.figure()
@@ -93,13 +94,14 @@ class Node:
         self.county = county
         self.state = state
         self.population = population #will be a list for every age
-        self.red = red if red else [0] * 100
-        self.blue = blue if blue else [0] * 100
+        self.red = red #if red else [0] * 100
+        self.blue = blue #if blue else [0] * 100
         self.lat = lat
         self.long = long
         self.reinforcement_parameter = reinforcement_parameter
         self.neighbours = neighbours
         return
+    
 
 def create_county_adjacency_dict(file_path):
    
@@ -114,6 +116,29 @@ def create_county_adjacency_dict(file_path):
         
         adjacent_counties = set(adjacency_matrix.loc[county][adjacency_matrix.loc[county] == 1].index.tolist())
         county_adjacency_dict[state][county] = adjacent_counties
+
+    return county_adjacency_dict
+
+def create_county_adjacency_dict_fips(file_path):
+    county_fips = pd.read_csv('./data/fips.csv',dtype=str, encoding='utf-8').set_index(["STNAME","CTYNAME"]).drop_duplicates()   
+    adjacency_matrix = pd.read_csv(file_path, index_col=0)
+    state_abbrevs = pd.read_csv('data/state_abbreviations.csv',dtype=str, encoding='utf-8').set_index("state_abbrev").drop_duplicates()
+
+    def county_stateabbrev_to_fips(county):
+        state_name = state_abbrevs.loc[county[-2:]]['state']
+        county_name = county[:-3] # remove the state abbreviation at the end (e.g. "New York NY" becomes "New York")
+        return county_fips.loc[(state_name,county_name)]['STATE'] + county_fips.loc[(state_name,county_name)]['COUNTY']
+    
+    county_adjacency_dict = {}
+
+    for county in adjacency_matrix.index:
+        fips_code = county_stateabbrev_to_fips(county)
+
+        adjacent_counties = set()
+
+        for c in adjacency_matrix.loc[county][adjacency_matrix.loc[county] == 1].index.tolist():
+            adjacent_counties.add(county_stateabbrev_to_fips(c))
+        county_adjacency_dict[fips_code] = adjacent_counties
 
     return county_adjacency_dict
 

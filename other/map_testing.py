@@ -1,5 +1,7 @@
 # Import libraries
 
+DATA_PATH = "C:/Users/ellio/OneDrive - Queen's University/Queen's/4th year fall/493/map_data"
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -169,11 +171,11 @@ def visualize_state_opinions(state_names):
 
 
     # Load and prepare geo-data, remove states we don't care about
-    counties = gpd.read_file("C:/Users/ellio/OneDrive - Queen's University/Queen's/4th year fall/493/map_data/tl_2024_us_county")
+    counties = gpd.read_file(DATA_PATH + "/tl_2024_us_county")
     counties = counties[counties.STATEFP.isin(state_codes)]
     counties = counties.set_index("GEOID")
 
-    states = gpd.read_file("C:/Users/ellio/OneDrive - Queen's University/Queen's/4th year fall/493/map_data/tl_2024_us_state")
+    states = gpd.read_file(DATA_PATH + "/tl_2024_us_state")
     states = states[states.STATEFP.isin(state_codes)]
 
     counties = counties.to_crs("ESRI:102003")
