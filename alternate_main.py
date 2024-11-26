@@ -1,12 +1,11 @@
-from alternate_utils.global_utils import *
-from alternate_utils.voting_utils import *
-from alternate_utils.graph_utils import *
-from alternate_utils.polya_utils import *
-from alternate_utils.population_utils import *
+#from alternate_utils.global_utils import *
+from utils.voting_utils import *
+from utils.graph_utils import *
+from utils.polya_utils import *
+from utils.population_utils import *
 from alternate_utils.immigration_utils import *
 
 import numpy as np
-
 
 def run_experiment(start_year, end_year, timestep, voting_df, neighbours, fips_dict):
 

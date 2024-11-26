@@ -1,70 +1,66 @@
-from utils.graphutils import Graph, Node, create_county_adjacency_dict, create_voting_data_list
+from utils.graphutils import Graph, Node, create_county_adjacency_dict_fips, create_voting_data_list
 import networkx as nx
 import random
 from utils.polya_process import polya
 import time
 import matplotlib.pyplot as plt
-import population
+import utils.population
+import pandas as pd
+from utils.voting_utils import *
 
 #Set Initial Values
-state_name = 'NV'
+state_to_graph = 'Florida'
 start_year = 2000   # Note: year MUST be a multiple of 4
 end_year = 2004
 
-st = time.time()*1000
-
 #Get County Adjacency Matrix
-neighbours = create_county_adjacency_dict("data\countyadj.csv")
-populations = population.get_population_data(state=state_name,year=start_year)
+neighbours = create_county_adjacency_dict_fips("data\countyadj.csv")
+#populations = population.get_population_data(state=state_name,year=start_year)
 
-t1 = time.time()*1000
-print(f"Reading County Adjacency Data: {int(t1-st)}ms")
+#Get FIPS (IDs) data for every county
+county_fips = pd.read_csv('data/fips.csv',dtype=str, encoding='utf-8').set_index(["STATE","COUNTY"]).drop_duplicates()
 
 #Get voting data
-voting_data = create_voting_data_list("data\countypres_2000-2020.csv")
-t2 = time.time()*1000
-print(f"Reading County Voting Data: {int(t2-t1)}ms")
-
-
-#start_profile = get_voting_data(state_name, start_year, voting_data)
-#end_profile = get_voting_data(state_name, end_year, voting_data)
-
+voting_path = "data\countypres.csv"
+voting_data = get_votes(pd.read_csv(voting_path), 2020)
 
 #Define Graph variable
 county_graph = Graph()
 
-#Initialized graph: 
+# Initialize graph: 
 # - set population, red, blue in each node
 # - connect nodes using adjacency matrix
-for state in neighbours:
-    for county in neighbours[state]:
-        population = random.uniform(500,10000)  #Eventually, will be = populations[state][county]
-        red = int(random.uniform(0,population)) # red = profile(2)
-        blue = population - red
-        county_graph.add_node(Node(
+for county in neighbours:
+    county_name = county_fips.loc[(county[:2],county[2:])]['CTYNAME']
+    state_name = county_fips.loc[(county[:2],county[2:])]['STNAME']
+    #print(f"{state_name} {county_name}")
+
+    population = random.uniform(500,10000)  #Eventually, will be = populations[state][county]
+    red = voting_data[county]['red']
+    blue = voting_data[county]['blue']
+    county_graph.add_node(Node(
             id=county,
-            state=state,
+            county=county_name,
+            state=state_name,
             red=red,
             blue=blue,
             population=population,
-            neighbours = neighbours[state][county],
+            neighbours = neighbours[county],
             reinforcement_parameter=10 #This is the initial reinforcement parameter. Will be overwritten once we have the birth function going.
-            ))
-t3 = time.time()*1000
-print(f"Building Graph: {int(t3-t2)}ms")
+    ))
+
+# print(county_graph.nodes[county].id)
+
+# print(county_graph.nodes['06083'].__dict__)
 
 #Display Graph Before Simulation
-county_graph.visualize_graph(state_name)
-county_graph.graph_node_opinions(state_name)
+county_graph.visualize_map(title_size=21,legend_size=10,annotation_size=9,image_size=13)
+# county_graph.graph_node_opinions(state_to_graph)
 
-#Run Simulation
-t4 = time.time()*1000
-county_graph, results = polya(county_graph,50000,state_name)
-t5 = time.time()*1000
-print(f"Running Polya Process: {int(t5-t4)}ms")
+county_graph, results = polya(county_graph,100)
 
-#Display node opinions after simulation
-county_graph.graph_node_opinions(state_name)
+# #Display node opinions after simulation
+county_graph.visualize_map(title_size=21,legend_size=10,annotation_size=9,image_size=13)
+# county_graph.graph_node_opinions(state_to_graph)
 
 plt.show()
-

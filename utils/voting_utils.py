@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 #--------------------------------------------------------------------------
 
@@ -20,15 +21,22 @@ def get_votes(voting_df, year):
 
     # Loop through dataset, adding dict of votes for each county
     for row in data:
-        county_fips = row["county_fips"]
-        county_name = row["county_name"]
-        state = row["state_po"]
-        party = row["party"]
+        if np.isnan(row["county_fips"]):
+            continue
+        county_fips = str(int(row["county_fips"]))
+        if len(county_fips) == 4:
+            county_fips = "0" + county_fips
+       
+        if row["party"] == "REPUBLICAN":
+            color = "red"
+        elif row["party"] == "DEMOCRAT":
+            color = "blue"
+        else:
+            continue
+
         if county_fips not in counties.keys():
             counties[county_fips] = {}
-        counties[county_fips]["county_name"] = county_name
-        counties[county_fips]["state"] = state
-        counties[county_fips][party] = row["candidatevotes"]
+        counties[county_fips][color] = row['candidatevotes'] + counties[county_fips].get(color,0)
         
     return counties
 
