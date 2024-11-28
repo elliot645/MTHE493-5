@@ -21,18 +21,34 @@ def polya(graph, n, state_filter=None, steps_per_year=1):
                 r += sum(graph.nodes[neighbour].red)
                 b += sum(graph.nodes[neighbour].blue)
             t = r + b
+            round_up_down = random.rand(0,1)
+            delta = 12/1000 * t * 1/steps_per_year # 12 births/year per 1000 people in U.S.
+            y = random.random() #rand in [0,1]
+
+            # Get the decimal value of delta
+            decimal_value = delta - int(delta)
+
+            # Check and round based on the comparison
+           
+            delta = int(delta) + 1 if decimal_value > y else int(delta) #round delta based on randomization 
+
             prob_r = r / t
 
             if random.random() < prob_r:
                 choose = 'r'
             else:
                 choose = 'b'
+            
 
+            #reinforcement_parameter = population[node.state][node.county]/1000 * brths/k/yr * 1/steps_per_year
+            #assuming 12 births/1000 ppl per year (can develop more)
+
+                #Get births per time period per capita yearly, use to calculate num births, maybe some randomization. Use node data to index data frame. Then use that reinforcement
             # Update node
             if choose == 'r':
-                node.red[18] += node.reinforcement_parameter
+                node.red[18] += delta
             else:
-                node.blue[18] += node.reinforcement_parameter
+                node.blue[18] += delta
 
             # Save data
             data = {'choose': choose, 'total': sum(node.red) + sum(node.blue), 'red ratio': sum(node.red) / (sum(node.red) + sum(node.blue))}

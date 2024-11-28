@@ -59,6 +59,8 @@ for index, row in db.iterrows():
 #years: 1 = 4/1/2020, 2 = 7/1/2020, 3 = 7/1/2021, 4 = 7/1/2022, 5 = 7/1/2023
 def get_population_data(year, state, county):
     #return a dictionary of the form data[state][county] that returns a population list for that county
+    if year > 2018:
+        year -= 2018 #just so we can ref years directly (wrong for 4/1/2020)
     population_data = []
     for i in range(0,101):
         population_data.append(age_data[year][state][county][i])
