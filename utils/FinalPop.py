@@ -1,16 +1,17 @@
 import pandas as pd
 import time
+import numpy as np
 
 
 def get_df(year):
     if year >= 2020 and year <= 2023:
-        db = pd.read_csv('./data/us_county_population_estimates_by_age_2020_to_2023.csv', encoding='latin1')
+        db = pd.read_csv('/Users/owen/Desktop/Population_tests/us_county_population_estimates_by_age_2020_to_2023 copy.csv', encoding='latin1')
     elif year >= 2010 and year < 2020:
-        db = pd.read_csv('./data/CC-EST2020-AGESEX-ALL.csv', encoding='latin1', low_memory = False)
+        db = pd.read_csv('./Users/owen/Desktop/Population_tests/CC-EST2020-AGESEX-ALL copy.csv', encoding='latin1', low_memory = False)
         for column in db.columns[6:]:  
             db[column] = pd.to_numeric(db[column], errors='coerce')
     elif year >= 2000 and year < 2010:
-        db = pd.read_csv('./data/co-est00int-agesex-5yr.csv', encoding='latin1', low_memory=False)
+        db = pd.read_csv('/Users/owen/Desktop/Population_tests/co-est00int-agesex-5yr copy.csv', encoding='latin1', low_memory=False)
         for column in db.columns[6:]:  
             db[column] = pd.to_numeric(db[column], errors='coerce')
     else:
@@ -58,7 +59,7 @@ age_buckets_new = {
     17: range(80, 85),
     18: range(85, 101),
     }
-    
+
 age_data = {}
 
 def pop_1(year):
@@ -149,7 +150,74 @@ def get_pop(year, state, county):
             population_data.append(age_data[year][state][county][i])
         return population_data
 
-st = time.time()*1000
-print(get_pop(2000, 'Alabama', 'Autauga County'))
-end = time.time()*1000
-print(f"Time to generate list: {int(end-st)}ms")
+def get_num_votes(voting_df, year):
+    
+    # Subset to year of interest
+    df = voting_df[voting_df["year"] == year]
+
+    # Convert to list of dicts (1 row per dict, keys are columns names)
+    data = df.to_dict(orient="records")
+
+    # Create dict to hold votes for each county
+    counties = {}
+
+    # Loop through dataset, adding dict of votes for each county
+    for row in data:
+        
+        county_name = row["county_name"]
+        
+        if row["party"] == "REPUBLICAN":
+            color = "red"
+        elif row["party"] == "DEMOCRAT":
+            color = "blue"
+        else:
+            continue
+
+        if county_name not in counties.keys():
+            counties[county_name] = {}
+        counties[county_name][color] = row['candidatevotes'] + counties[county_name].get(color,0)
+        
+    return counties
+
+def turnout_dict(year):
+    if year < 2000 or year > 2020:
+        raise ValueError("year must be in range 2000-2020")
+    
+    voting_path = "/Users/owen/Desktop/Population_tests/countypres_updated copy.csv"
+    voting_data = get_num_votes(pd.read_csv(voting_path), year)
+
+    return voting_data
+
+def init_rb(year, state, county):
+    dict = turnout_dict(year)
+    list = get_pop(year, state, county)
+    list_r = []
+    list_b = []
+
+    ratio_red = dict[county]['red']/sum(list)
+    ratio_blue = dict[county]['blue']/sum(list)
+
+    for i in range(0,101):
+        list_r.append(round(list[i]* ratio_red))
+        list_b.append(round(list[i]* ratio_blue))
+
+    return list_r, list_b
+
+#c = turnout_dict(2000)['Autauga County']
+#print(c)
+
+#d = sum(get_pop(2000, 'Alabama', 'Autauga County'))
+#print(d)
+
+
+print(turnout_dict(2000)['Lincoln County'])
+#print(get_pop(2000, 'Alabama', 'Autauga County'))
+a, b = init_rb(2000, 'Nevada', 'Lincoln County')
+#print(a)
+#print(b)
+
+print('r =', sum(a))
+print('b =',sum(b))
+
+
+    
