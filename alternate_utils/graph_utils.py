@@ -10,6 +10,10 @@ class Graph:
         self.networkx = nx.Graph()
         return
 
+    # Add a new node with no edges
+    def add_solo_node(self, node):
+        self.nodes[node.id] = node
+
     #Add a new node (or replace an existing node with the same ID)
     def add_node(self, node):
         self.nodes[node.id] = node
@@ -88,8 +92,8 @@ class Node:
         self.name = name
         self.state = state
         self.population = population #will be a list for every age
-        self.red = red if red else [0] * 100  
-        self.blue = blue if blue else [0] * 100  
+        self.red = red 
+        self.blue = blue 
         self.lat = lat
         self.long = long
         self.reinforcement_parameter = reinforcement_parameter
@@ -102,7 +106,7 @@ class Node:
 
 """
 Initialize the graph object
-Input: initial votes per county
+Input: initial votes per county, nei
 Output: graph object
 """
 def init_graph(start_votes, neighbours, fips_dict):
@@ -110,27 +114,47 @@ def init_graph(start_votes, neighbours, fips_dict):
     # invoke graph constructor
     graph = Graph()
 
-    # 
-    for state in neighbours:
-        """POTENTIAL ISSUE: COUNTIES WITH SAME NAMES"""
-        for county in neighbours[state]: 
-            # notation
-            name = county[-1:-10]
-            fips = fips_dict[state][name]
-            red = start_votes[fips]["REPUBLICAN"]
-            blue = start_votes[fips]["DEMOCRAT"]
-            population = red + blue
+    for fips in fips_dict:
+        # retrieve information
+        county_name = fips_dict[fips]["county_name"]
+        state_po = fips_dict[fips]["state"]
+        red_votes = start_votes[fips]["REPUBLICAN"]
+        blue_votes = start_votes[fips]["DEMOCRAT"]
+        if red_votes == "NA" or blue_votes == "NA":
+            total_votes = "NA"
+        else:
+            total_votes = red_votes + blue_votes
 
-            # add node
-            graph.add_node(Node(
-                id = fips,
-                name = name,
-                state = state,
-                red = red,
-                blue = blue,
-                population = population,
-                neighbours = neighbours[state][county],
-                reinforcement_parameter = 1
-            ))
+        # add node
+        graph.add_solo_node(Node(
+            id = fips,
+            name = county_name,
+            state = state_po,
+            red = red_votes,
+            blue = blue_votes,
+            population = total_votes,
+            neighbours = neighbours,
+            reinforcement_parameter = 1
+        ))
+
+    return graph
+
+#--------------------------------------------------------------------------
+
+def create_county_adjacency_dict(file_path):
+   
+    adjacency_matrix = pd.read_csv(file_path, index_col=0)
+    
+    county_adjacency_dict = {}
+
+    for county in adjacency_matrix.index:
+        state = county.split()[-1] 
+        if state not in county_adjacency_dict:
+            county_adjacency_dict[state] = {}
+        
+        adjacent_counties = set(adjacency_matrix.loc[county][adjacency_matrix.loc[county] == 1].index.tolist())
+        county_adjacency_dict[state][county] = adjacent_counties
+
+    return county_adjacency_dict
 
     
