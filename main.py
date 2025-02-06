@@ -1,70 +1,92 @@
-from utils.graphutils import Graph, Node, create_county_adjacency_dict, get_voting_data
-import networkx as nx
-import random
-from utils.polya_process import polya
-import time
-import matplotlib.pyplot as plt
-import population
+from utils.data_utils import *
+from utils.graph_utils import *
+from utils.polya_utils import *
 
-#Set Initial Values
-state_name = 'NV'
-start_year = 2000   # Note: year MUST be a multiple of 4
-end_year = 2004
+"""
+TO-DO:
+-set adjacency for Hawaii, Arkansas, Oglala Lakota SD; currently have no neighbours
+-rather than pick the active player, set a strategy for each player?
+-choose which metric to minimize in a two-player game
+"""
+#-------------------------------------------------------------------------------------------------
 
-st = time.time()*1000
+def run_curing_experiment(trials, network, startvotes, params):
 
-#Get County Adjacency Matrix
-neighbours = create_county_adjacency_dict("data\countyadj.csv")
-populations = population.get_population_data(state=state_name,year=start_year)
+    # dict to hold superurn ratios over time
+    strats = params["strats"]
+    results = {strats[strat_id]:{} for id in strats}
 
-t1 = time.time()*1000
-print(f"Reading County Adjacency Data: {int(t1-st)}ms")
+    # run specified no. trials for each strategy
+    for strat_id in strats:
+        for trial in range(1, trials+1):
+            # reset initial conditions
+            for node in network:
+                node.red = startvotes[node.id]["REPUBLICAN"]
+                node.blue = startvotes[node.id]["DEMOCRAT"]
+            # perform campaign
+            match strat_id:
+                case 1:
+                    results[strats[strat_id]][trial] = uniform_vdelta(network, params) 
+                case 2:
+                    results[strats[strat_id]][trial] = int_vdelta(network, params)
 
-#Get voting data
-voting_data = create_voting_data_list("data\countypres_2000-2020.csv")
-t2 = time.time()*1000
-print(f"Reading County Voting Data: {int(t2-t1)}ms")
+    # average the metric over all trials
+    output = {strat:{} for strat in results}
+    for strat in results:
+        for t in range(0, params["timesteps"]+1):
+            sum = 0
+            count = 0
+            for trial in results[strat]:
+                sum += results[strat][trial][t]
+                count += 1
+            avg = sum / count
+            output[strat][t] = avg
 
+    return output
 
-#start_profile = get_voting_data(state_name, start_year, voting_data)
-#end_profile = get_voting_data(state_name, end_year, voting_data)
+#-------------------------------------------------------------------------------------------------
 
+if __name__ == "__main__":
 
-#Define Graph variable
-county_graph = Graph()
+    # Set filepaths 
+    data_path = r"data\countypres.xlsx"
+    votes_sheet = "countypres"
+    fips_sheet = "fipslist"
+    adj_path = r"data\county_adjacency.csv"
+    results_path = r"data\results.xlsx"
 
-#Initialized graph: 
-# - set population, red, blue in each node
-# - connect nodes using adjacency matrix
-for state in neighbours:
-    for county in neighbours[state]:
-        population = random.uniform(500,10000)  #Eventually, will be = populations[state][county]
-        red = int(random.uniform(0,population)) # red = profile(2)
-        blue = population - red
-        county_graph.add_node(Node(
-            id=county,
-            state=state,
-            red=red,
-            blue=blue,
-            population=population,
-            neighbours = neighbours[state][county],
-            reinforcement_parameter=10 #This is the initial reinforcement parameter. Will be overwritten once we have the birth function going.
-            ))
-t3 = time.time()*1000
-print(f"Building Graph: {int(t3-t2)}ms")
+    #================================================
+    # SET TRIAL PARAMETERS HERE:
+    state = "NY"                    # state=None --> whole country
+    start_year = 2000               # Note: 2020 is missing data
+    player = "blue"
+    rbudget = 10000
+    bbudget = 10000
+    timesteps = 200
+    trials = 2
+    strats = { 
+        1 : "Uniform Allocation via Delta",                       
+        2 : "Interior Node Targeting via Delta"  
+    }
+    #================================================
 
-#Display Graph Before Simulation
-county_graph.visualize_graph(state_name)
-county_graph.graph_node_opinions(state_name)
+    # The following parameters are fixed for all trials:
+    fipsdict = get_fipsdict(data_path, fips_sheet, state)    # Nodes
+    neighbours = get_adjacency_dict(adj_path, fipsdict)      # Edges
+    network = Graph()                                        # Graph 
+    network.set_topology(fipsdict, neighbours)               # Graph topology           
+    network.get_centrality()                                 # Node centrality  
+    startvotes = get_votes(data_path, votes_sheet,           # Initial conditions:
+        fipsdict, start_year, state)     
+    params = {                                               # Game parameters:
+        "player" : player,                                   # Active player
+        "rbudget" : rbudget,                                 # Red's budget at each t
+        "bbudget" : bbudget,                                 # Blue's budget at each t
+        "timesteps" : timesteps,                             # No. timesteps to run sim
+        "strats" : strats                                    # Strategies to run
+    }   
 
-#Run Simulation
-t4 = time.time()*1000
-county_graph, results = polya(county_graph,50000,state_name)
-t5 = time.time()*1000
-print(f"Running Polya Process: {int(t5-t4)}ms")
-
-#Display node opinions after simulation
-county_graph.graph_node_opinions(state_name)
-
-plt.show()
+    # Run specified number of curing trials for given parameters
+    output = run_curing_experiment(trials, network, startvotes, params)
+    print_curing_results(output)
 
