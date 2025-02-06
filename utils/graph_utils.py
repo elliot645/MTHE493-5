@@ -34,7 +34,7 @@ class Graph:
         start = time.time()
 
         for fips in fipsdict:
-            node = Node(fipsdict[fips]["county"], fipsdict[fips]["state"], neighbours[fips])
+            node = Node(fips, fipsdict[fips]["county"], fipsdict[fips]["state"], neighbours[fips])
             self.nodes[node.id] = node
             self.networkx.add_edges_from([(node.id,neighbour) for neighbour in node.neighbours])
 
@@ -44,6 +44,8 @@ class Graph:
 
     # Get centrality for each node
     def get_centrality(self):
+        for node in self:
+            node.centrality = 1
         """
         # get shortest paths between all nodes in network
         lengths = dict(nx.all_pairs_shortest_path_length(self))
@@ -71,7 +73,7 @@ class Graph:
             if player == "blue":
                 node.ratio = b / (r+b)
             sum += node.ratio
-        avg_ratio = sum / self.nodes()
+        avg_ratio = sum / self.num_nodes()
         return avg_ratio
     
     # Visualize network

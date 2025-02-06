@@ -14,7 +14,7 @@ def run_curing_experiment(trials, network, startvotes, params):
 
     # dict to hold superurn ratios over time
     strats = params["strats"]
-    results = {strats[strat_id]:{} for id in strats}
+    results = {strats[strat_id]:{} for strat_id in strats}
 
     # run specified no. trials for each strategy
     for strat_id in strats:
@@ -29,6 +29,8 @@ def run_curing_experiment(trials, network, startvotes, params):
                     results[strats[strat_id]][trial] = uniform_vdelta(network, params) 
                 case 2:
                     results[strats[strat_id]][trial] = int_vdelta(network, params)
+            print("Trial", trial, "complete.")
+        print("Strategy", strat_id, "complete.")
 
     # average the metric over all trials
     output = {strat:{} for strat in results}
@@ -63,7 +65,7 @@ if __name__ == "__main__":
     rbudget = 10000
     bbudget = 10000
     timesteps = 200
-    trials = 2
+    trials = 10
     strats = { 
         1 : "Uniform Allocation via Delta",                       
         2 : "Interior Node Targeting via Delta"  
@@ -88,5 +90,5 @@ if __name__ == "__main__":
 
     # Run specified number of curing trials for given parameters
     output = run_curing_experiment(trials, network, startvotes, params)
-    print_curing_results(output)
+    print_curing_results(output, results_path)
 
