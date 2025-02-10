@@ -21,14 +21,21 @@ def run_curing_experiment(trials, network, startvotes, params):
         for trial in range(1, trials+1):
             # reset initial conditions
             for node in network:
-                node.red = startvotes[node.id]["REPUBLICAN"]
-                node.blue = startvotes[node.id]["DEMOCRAT"]
+                r = startvotes[node.id]["REPUBLICAN"]
+                b = startvotes[node.id]["REPUBLICAN"]
+                node.red = r
+                node.blue = b
+                node.pop = r + b
             # perform campaign
             match strat_id:
                 case 1:
                     results[strats[strat_id]][trial] = uniform_vdelta(network, params) 
                 case 2:
-                    results[strats[strat_id]][trial] = int_vdelta(network, params)
+                    results[strats[strat_id]][trial] = pop_vdelta(network, params)
+                case 3:
+                    results[strats[strat_id]][trial] = ci_vdelta(network, params)
+                case 4:
+                    results[strats[strat_id]][trial] = pop_ci_vdelta(network, params)
             print("Trial", trial, "complete.")
         print("Strategy", strat_id, "complete.")
 
@@ -51,7 +58,7 @@ def run_curing_experiment(trials, network, startvotes, params):
 if __name__ == "__main__":
 
     # Set filepaths 
-    data_path = r"data\countypres.xlsx"
+    data_path = r"data\countypres_clean.xlsx"
     votes_sheet = "countypres"
     fips_sheet = "fipslist"
     adj_path = r"data\county_adjacency.csv"
@@ -59,16 +66,18 @@ if __name__ == "__main__":
 
     #================================================
     # SET TRIAL PARAMETERS HERE:
-    state = "NY"                    # state=None --> whole country
+    state = "PA"                    # state=None --> whole country
     start_year = 2000               # Note: 2020 is missing data
     player = "blue"
     rbudget = 10000
     bbudget = 10000
     timesteps = 200
-    trials = 10
+    trials = 100
     strats = { 
-        1 : "Uniform Allocation via Delta",                       
-        2 : "Interior Node Targeting via Delta"  
+        1 : "Uniform Allocation via Delta",
+        2 : "Population-Weighted via Delta",                       
+        3 : "Centrality-Infection via Delta",
+        4 : "Population-Weighted Centrality Infection via Delta"  
     }
     #================================================
 

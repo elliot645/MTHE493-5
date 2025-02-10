@@ -11,7 +11,6 @@ import random
 
 # uniform vs. uniform
 def uniform_vdelta(network, params):
-    
     # unbox params
     player = params["player"]
     rbudget = params["rbudget"]
@@ -49,8 +48,50 @@ def uniform_vdelta(network, params):
 
     return results
 
-# int vs. uniform
-def int_vdelta(network, params):
+# population-weighted vs. uniform
+def pop_vdelta(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.get_superurn_ratios(player)
+
+    # get total population
+    total_pop = 0
+    for node in network:
+        total_pop += node.pop
+
+    # begin polya process
+    for t in range(1, timesteps+1):
+        for node in network:
+
+            # calculate delta values and superurn ratios
+            if player == "red":
+                delta_red = (node.pop/total_pop)*rbudget
+                delta_blue = bbudget / network.num_nodes()
+                prob_red = node.ratio
+            if player == "blue":
+                delta_red = rbudget / network.num_nodes()
+                delta_blue = (node.pop/total_pop)*bbudget
+                prob_red = 1 - node.ratio
+
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta_red
+            else:
+                node.blue += delta_blue
+
+        # calculate infection rate across network
+        results[t] = network.get_superurn_ratios(player)
+
+    return results
+
+# centrality-infection-weighted vs. uniform
+def ci_vdelta(network, params):
     # unbox params
     player = params["player"]
     rbudget = params["rbudget"]
@@ -62,26 +103,20 @@ def int_vdelta(network, params):
     results[0] = network.get_superurn_ratios(player)
 
     for t in range(1, timesteps+1):
-
         # get CIR denominator for this timestep
         denom = 0
         for node in network:
             denom += node.degree*node.centrality*(1-node.ratio)
 
         for node in network:
-            
             # calculate delta values
             if player == "red":
                 delta_red = (rbudget*node.degree*node.centrality*(1-node.ratio)) / denom
                 delta_blue = bbudget / network.num_nodes()
-            else:
-                delta_red = rbudget / network.num_nodes()
-                delta_blue = (bbudget*node.degree*node.centrality*(1-node.ratio)) / denom
-            
-            # get draw probability
-            if player == "red":
                 prob_red = node.ratio
             if player == "blue":
+                delta_red = rbudget / network.num_nodes()
+                delta_blue = (bbudget*node.degree*node.centrality*(1-node.ratio)) / denom
                 prob_red = 1 - node.ratio
 
             # perform draw
@@ -95,5 +130,42 @@ def int_vdelta(network, params):
 
     return results
             
+# population- and centrality-infection-weighted vs. uniform
+def pop_ci_vdelta(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
 
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.get_superurn_ratios(player)
 
+    for t in range(1, timesteps+1):
+        # get CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom += node.pop*node.degree*node.centrality*(1-node.ratio)
+        
+        for node in network:
+            # calculate delta values
+            if player == "red":
+                delta_red = ((node.pop*node.degree*node.centrality*(1-node.ratio))/denom)*rbudget
+                delta_blue = bbudget / network.num_nodes()
+                prob_red = node.ratio
+            if player == "blue":
+                delta_red = rbudget / network.num_nodes()
+                delta_blue = ((node.pop*node.degree*node.centrality*(1-node.ratio))/denom)*bbudget
+                prob_red = 1 - node.ratio
+
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta_red
+            else:
+                node.blue += delta_blue
+
+        # calculate infection rate
+        results[t] = network.get_superurn_ratios(player)
+
+    return results

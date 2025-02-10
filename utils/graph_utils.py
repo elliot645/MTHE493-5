@@ -57,11 +57,13 @@ class Graph:
             source_node.centrality = 1 / centrality
         """
         return
-    
-    # Get superurn ratios for each node, return average ratio
+
+    # Get superurn ratios for each node
+    # Return's average superurn ratio weighted by population
     # Note: get's the player's ratio, not the opponent's
     def get_superurn_ratios(self, player):
         sum = 0
+        total_pop = 0
         for node in self:
             r = node.red
             b = node.blue
@@ -72,8 +74,9 @@ class Graph:
                 node.ratio = r / (r+b)
             if player == "blue":
                 node.ratio = b / (r+b)
-            sum += node.ratio
-        avg_ratio = sum / self.num_nodes()
+            sum += node.pop*node.ratio
+            total_pop += node.pop
+        avg_ratio = sum / total_pop
         return avg_ratio
     
     # Visualize network
