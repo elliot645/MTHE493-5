@@ -4,56 +4,10 @@ from utils.polya_utils import *
 
 """
 TO-DO:
--set adjacency for Hawaii, Arkansas, Oglala Lakota SD; currently have no neighbours
--rather than pick the active player, set a strategy for each player?
--choose which metric to minimize in a two-player game
+-set adjacency for Hawaii, Arkansas, Oglala Lakota SD
+    -they currently have no neighbours
+-rather than pick active player, set strategy for each player?
 """
-#-------------------------------------------------------------------------------------------------
-
-def run_curing_experiment(trials, network, startvotes, params):
-
-    # dict to hold superurn ratios over time
-    strats = params["strats"]
-    results = {strats[strat_id]:{} for strat_id in strats}
-
-    # run specified no. trials for each strategy
-    for strat_id in strats:
-        for trial in range(1, trials+1):
-            # reset initial conditions
-            for node in network:
-                r = startvotes[node.id]["REPUBLICAN"]
-                b = startvotes[node.id]["REPUBLICAN"]
-                node.red = r
-                node.blue = b
-                node.pop = r + b
-            # perform campaign
-            match strat_id:
-                case 1:
-                    results[strats[strat_id]][trial] = uniform_vdelta(network, params) 
-                case 2:
-                    results[strats[strat_id]][trial] = pop_vdelta(network, params)
-                case 3:
-                    results[strats[strat_id]][trial] = ci_vdelta(network, params)
-                case 4:
-                    results[strats[strat_id]][trial] = pop_ci_vdelta(network, params)
-            print("Trial", trial, "complete.")
-        print("Strategy", strat_id, "complete.")
-
-    # average the metric over all trials
-    output = {strat:{} for strat in results}
-    for strat in results:
-        for t in range(0, params["timesteps"]+1):
-            sum = 0
-            count = 0
-            for trial in results[strat]:
-                sum += results[strat][trial][t]
-                count += 1
-            avg = sum / count
-            output[strat][t] = avg
-
-    return output
-
-#-------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
 
@@ -66,8 +20,8 @@ if __name__ == "__main__":
 
     #================================================
     # SET TRIAL PARAMETERS HERE:
-    state = "PA"                    # state=None --> whole country
-    start_year = 2000               # Note: 2020 is missing data
+    state = "PA"        # state=None --> whole country
+    start_year = 2000   # Note: 2020 is missing data
     player = "blue"
     rbudget = 10000
     bbudget = 10000
@@ -84,7 +38,7 @@ if __name__ == "__main__":
     # The following parameters are fixed for all trials:
     fipsdict = get_fipsdict(data_path, fips_sheet, state)    # Nodes
     neighbours = get_adjacency_dict(adj_path, fipsdict)      # Edges
-    network = Graph()                                        # Graph 
+    network = Graph()                                        # Graph object
     network.set_topology(fipsdict, neighbours)               # Graph topology           
     network.get_centrality()                                 # Node centrality  
     startvotes = get_votes(data_path, votes_sheet,           # Initial conditions:
