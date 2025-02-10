@@ -53,5 +53,7 @@ if __name__ == "__main__":
 
     # Run specified number of curing trials for given parameters
     output = run_curing_experiment(trials, network, startvotes, params)
+
+    # Print to excel
     print_curing_results(output, results_path)
 
