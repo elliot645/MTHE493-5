@@ -42,20 +42,17 @@ class Graph:
         print("Network topology constructed:", round((end-start)*1000), "ms")
         return 
 
-    # Get centrality for each node
-    def get_centrality(self):
+    def set_centrality(self, centrality):
         for node in self:
-            node.centrality = 1
-        """
-        # get shortest paths between all nodes in network
-        lengths = dict(nx.all_pairs_shortest_path_length(self))
-        # compute centrality 
-        for source_node in self:
-            centrality = 0
-            for target_node in self:
-                centrality += lengths[source_node.id][target_node.id]
-            source_node.centrality = 1 / centrality
-        """
+            if len(str(node.id)) == 4:
+                id_string = "0" + str(node.id)
+            else:
+                id_string = str(node.id)
+            if id_string in centrality:
+                node.centrality = centrality[id_string]
+            else:
+                node.centrality = 0.000001
+                print("No centrality for", node.id, node.name, node.state)
         return
 
     # Get superurn ratios for each node

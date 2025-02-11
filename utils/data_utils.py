@@ -2,6 +2,7 @@ from utils.graph_utils import *
 from utils.polya_utils import *
 import pandas as pd
 import time
+import json
 
 #--------------------------------------------------------------------------
 # Initialization Functions
@@ -48,6 +49,10 @@ def get_adjacency_dict(filepath, fipsdict):
     print("Adjacency retrieved:", round((end-start)*1000), "ms")
     return adj_dict
 
+def get_centrality_dict(filepath):
+    with open(filepath) as json_file:
+        return json.load(json_file)
+    
 # Get voting data for specified year; return dict like {fips:{party:int, ...}}
 def get_votes(filepath, sheetname, fipsdict, year, state):
     start = time.time()
@@ -67,6 +72,7 @@ def get_votes(filepath, sheetname, fipsdict, year, state):
     end = time.time()
     print("Voting data for ", year, "retrieved:", round((end-start)*1000), "ms")
     return votes
+
 
 #--------------------------------------------------------------------------
 # Classic Polya Trial Functions
