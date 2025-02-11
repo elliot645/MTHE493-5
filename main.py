@@ -4,9 +4,10 @@ from utils.polya_utils import *
 
 """
 TO-DO:
--set adjacency for Hawaii, Arkansas, Oglala Lakota SD
-    -they currently have no neighbours
--rather than pick active player, set strategy for each player?
+- centrality
+- set adjacency for Hawaii, Arkansas, Oglala Lakota SD
+    - they currently have no neighbours
+- rather than pick active player, set strategy for each player?
 """
 
 if __name__ == "__main__":
