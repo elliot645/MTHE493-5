@@ -89,7 +89,7 @@ class Graph:
         return
         
 class Node:
-    def __init__(self,id,county,state,population=None,red=None,blue=None,lat=None,long=None,reinforcement_parameter=1,neighbours = ()):
+    def __init__(self,id,county,state,population=None,red=None,blue=None,lat=None,long=None,reinforcement_parameter=1,neighbours = {}):
         self.id = id #FIPS ID
         self.county = county
         self.state = state
@@ -168,6 +168,10 @@ def get_voting_data(state, year, voting_data):
         2. What to do about other parties?
 
     """
+
+#KEDDIE
+def get_population_dict(year):
+    pass 
 
 def death_data_array_generator():
     df = pd.read_csv("death_data.csv")

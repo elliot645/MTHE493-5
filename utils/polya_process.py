@@ -18,21 +18,28 @@ def polya(graph, n,state_filter=None):
             r = node.red 
             b = node.blue
             for neighbour in node.neighbours:
-                r += graph.nodes[neighbour].red
-                b += graph.nodes[neighbour].blue
+                r += graph.nodes[neighbour].red/10 #/10 so they are not as prevelant in the super node
+                b += graph.nodes[neighbour].blue/10
             t = r + b
-            prob_r = r/t
+
+            delta = 12/1000 * (r+b) /10  # 12 births/year per 1000 people in U.S.
+            y = random.random() #rand in [0,1]
+            # Get the decimal value of delta
+            decimal_value = delta - int(delta)
+            # Check and round based on the comparison
+            delta = int(delta) + 1 if decimal_value > y else int(delta) #round delta based on randomization 
+
+            prob_r = r / t
 
             if random.random() < prob_r:
                 choose = 'r'
             else:
                 choose = 'b'
 
-            #Add balls of the chosen color to the super urn
             if choose == 'r':
-                node.red += node.reinforcement_parameter
+                node.red += delta
             else:
-                node.blue += node.reinforcement_parameter
+                node.blue += delta
 
             #save data
             data = {'choose':choose,

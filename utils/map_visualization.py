@@ -117,7 +117,7 @@ def visualize_state_opinions(graph,state_names=None,image_size=18,title_size=32,
                         break
             
             else:
-                print(f"{row['STATEFP']+row['COUNTYFP']} not in graph, but in map data")
+                #print(f"{row['STATEFP']+row['COUNTYFP']} not in graph, but in map data")
                 colors.append("#EBCC34")
 
         return colors
@@ -161,8 +161,9 @@ def visualize_state_opinions(graph,state_names=None,image_size=18,title_size=32,
                 fontweight="bold"
             )
 
-    def add_legend(data_breaks):
-        patches = [Patch(facecolor=c, edgecolor=edge_color, label=t) for _, c, t in data_breaks]
+    def add_legend(breaks):
+        breaks.append((0,  "#EBCC34", "No Data Available"))
+        patches = [Patch(facecolor=c, edgecolor=edge_color, label=t) for _, c, t in breaks]
 
         leg = plt.legend(
             handles=patches,
