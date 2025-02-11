@@ -5,7 +5,7 @@ import time
 import json
 
 #--------------------------------------------------------------------------
-# Initialization Functions
+# Initialization 
 #--------------------------------------------------------------------------
 
 # Get dict like {state:{fips:county,...}}
@@ -75,11 +75,16 @@ def get_votes(filepath, sheetname, fipsdict, year, state):
 
 
 #--------------------------------------------------------------------------
-# Classic Polya Trial Functions
+# Classic Polya Trials
 #--------------------------------------------------------------------------
 
+# add initial and final conditions to each node
+
+# calculate error
+
+
 #--------------------------------------------------------------------------
-# Campaign/Curing Trial Functions
+# Campaign/Curing Trials
 #--------------------------------------------------------------------------
 
 def run_curing_experiment(trials, network, startvotes, params):

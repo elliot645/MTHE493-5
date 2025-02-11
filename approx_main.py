@@ -1,19 +1,27 @@
-from utils.data_utils import *
-from utils.graph_utils import *
-from utils.polya_utils import *
+from approx_utils import *
 
 if __name__ == "__main__":
 
-    # get initial conditions
+    """
+    Analytical Model II(a): 
+        1. Get initial conditions for all states, years
+        2. Project 200 R and B values between each election
+        3. Create either:
+            i. One graph for whole country
+            ii. One graph per state
+        4. Calculate rho_i, delta_i, delta_i' for each timestep
+        5. Save as dict? Per year? Save as JSON?
+        6. Run on same network and compare error 
+    """
 
-    # get node contagion process P:
-    # linearly project 200 data points between elections
-    
-    # get expression for polya contagion process Q
+    # get fipsdict
+    # get adjacency
+    # get votes for each year
+    # project 200 data points
+    # create graph: country-wide or one per state
+    # calculate parameters for each node (not time-dependent)
 
-    # minimize D(P||Q)
-    # delta_i = 1/n argmin D(P||Q)
 
-    # save results as dict {year:{fips:delta}}
+
 
     pass
