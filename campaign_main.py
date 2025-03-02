@@ -44,7 +44,7 @@ def run_curing_experiment(trials, network, startvotes, params):
                 case 4:
                     results[strats[strat_id]][trial] = pop_ci_vdelta(network, params)
                 case 5:
-                    pass
+                     results[strats[strat_id]][trial] = ci_vinjection(network, params)
                 case 6:
                     pass
                 case 7:
@@ -95,17 +95,15 @@ if __name__ == "__main__":
     bbudget = 100000
     timesteps = 200
     trials = 10
-    reinforcement_strats = { 
+    strats = { 
         1 : "Uniform Allocation via Delta",
         2 : "Population-Weighted via Delta",                       
         3 : "Centrality-Infection via Delta",
-        4 : "Population-Weighted Centrality Infection via Delta"  
-    }
-    injection_strats = {
-        5 : "",
-        6 : "",
-        7 : "",
-        8 : ""
+        4 : "Population-Weighted Centrality Infection via Delta",
+        5 : "Centrality-Infection via Injection vs. Uniform"
+        #6 : "",
+        #7 : "",
+        #8 : ""
     }
 
     #---------------------------------------------------------------
@@ -124,7 +122,8 @@ if __name__ == "__main__":
         "rbudget" : rbudget,                                 # Red's budget at each t
         "bbudget" : bbudget,                                 # Blue's budget at each t
         "timesteps" : timesteps,                             # No. timesteps to run sim
-        "strats" : reinforcement_strats                      # Strategies to run
+        "strats" : strats,                                   # Strategies to run
+        "delta" : 50                                         # For injection strategies
     }   
 
     #---------------------------------------------------------------

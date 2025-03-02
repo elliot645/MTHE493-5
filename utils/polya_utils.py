@@ -184,10 +184,51 @@ def pop_ci_vdelta(network, params):
 """
 - uniform injection
 - population-weighted
-- centrality-infection weighted
+- centrality-infection weighted (Elliot)
 - population and centrality-infection weighted
 
 
 - Anna: delta_i for each node (delta = K*h_b(U_0))
     - delta_i will be an attribute of each node 
 """
+
+# centrality-infection-weighted via injection vs. uniform
+def ci_vinjection(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+
+    for t in range(1, timesteps+1):
+        # get CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom += node.degree*node.centrality*(1-node.ratio)
+
+        for node in network:
+            #Inject balls blue and red balls
+            node.red += rbudget / network.num_nodes()
+            node.blue += (bbudget*node.degree*node.centrality*(1-node.ratio)) / denom
+            
+            # Run normal polya process
+            if player == "red":
+                prob_red = node.suratio
+            if player == "blue":
+                prob_red = 1 - node.suratio
+
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta 
+            else:
+                node.blue += delta
+
+        # calculate infection rate
+        results[t] = network.update_superurn_ratios(player)
+
+    return results
