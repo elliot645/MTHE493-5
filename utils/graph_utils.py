@@ -55,22 +55,31 @@ class Graph:
                 print("No centrality for", node.id, node.name, node.state)
         return
 
-    # Get superurn ratios for each node
-    # Return's average superurn ratio weighted by population
-    # Note: get's the player's ratio, not the opponent's
-    def get_superurn_ratios(self, player):
+    # Update superurn ratios for each node; return's average urn ratio weighted by population
+    # Ratios calculated based on specified player
+    def update_superurn_ratios(self, player):
         sum = 0
         total_pop = 0
         for node in self:
             r = node.red
             b = node.blue
-            for neighbour in node.neighbours:
-                r += self.nodes[neighbour].red
-                b += self.nodes[neighbour].blue
+
+            # update node's ratio
             if player == "red":
                 node.ratio = r / (r+b)
             if player == "blue":
                 node.ratio = b / (r+b)
+
+            # update node's superurn ratio
+            for neighbour in node.neighbours:
+                r += self.nodes[neighbour].red
+                b += self.nodes[neighbour].blue
+            if player == "red":
+                node.suratio = r / (r+b)
+            if player == "blue":
+                node.suratio = b / (r+b)
+
+            # calculate average ratio weighted by population
             sum += node.pop*node.ratio
             total_pop += node.pop
         avg_ratio = sum / total_pop

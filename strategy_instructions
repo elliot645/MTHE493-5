@@ -1,0 +1,21 @@
+
+To Add a New Strategy:
+----------------------
+
+1. In "polya_utils", define a new function to execute your Strategy
+    i. The parameters are the graph object "network" and the dict "params". "params" contains:
+        - player - string ("red" or "blue"), the active player
+        - rbudget - int, red's budget
+        - bbudget - int, blue's budget
+        - timesteps - int, number of timesteps to run polya process
+    ii. The "results" dict contains timesteps as keys and average urn ratio as values
+    iii. The Graph method "update_superurn_ratios" updates all nodes' superurn ratio (attribute "suratio") based on the node's "red" and "blue" attribute. It also returns a population-weighted average of urn opinion across the network (attribute "ratio"). Ratios are calculated based on the specified player.
+    iv. To modify the passive player's strategy, tweak how delta is calculated for player=="red" and player=="blue"
+2. In "campaign_main", do the following: 
+    i. Add a function call to the match case in "run_curing_experiment"
+    ii. Add a title for your strategy to the "injection_strats" dict (don't reuse keys)
+    iii. Specify the desired dict of strategies (reinforcement or injection) in "params"
+    iv. The results will print to an excel at whichever filepath you specify as "results_path" - its clunky so feel free to add a plotting function if you'd prefer
+    v. Try to run at least 100 trials (Mikhail does 250 in his thesis)
+
+    
