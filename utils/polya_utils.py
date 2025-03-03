@@ -16,6 +16,51 @@ def classic_polya(r, b, timesteps, delta):
     ratio = r/(r+b)
     return ratio
 
+
+# --------------------------
+# Unifrom Injection Campaign
+# ---------------------------
+
+def uniform_injection_strategy(network, params):
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+
+    results{}
+
+    for t in range(timesteps):
+        network.update_superurn_ratios()
+
+        if player == "red"
+            total_budget = "budget"
+            passive_player = "blue"
+        elif player == "blue":
+            total_budget = bbudget
+            passive_player = "red"
+        else: 
+            raise ValueError("Player should be red or blue")
+
+        budget_per_node = total_budget / netowrk.total_nodes
+        for node in network.counties:
+            urn = network.urns[node]
+            neighbours = network.adjacency_map[node]
+            for _ in range(int(budget_per_node)):
+                if neighbours:
+                    choose_random_neighbour = random.choice(neighbours)
+                    draw_ball = random.choice([player, passive_player])
+                    network.populations[node][draw_ball]-=1
+                    network.populations[choose_random_neighbour][draw_ball] +=1
+
+        average_ratio = network.ratio
+        results[t] = average_ratio
+
+return results
+            
+    
+
+
+
 #--------------------------------------------------------------------------
 # Curing/Game Theory Campaign
 #--------------------------------------------------------------------------
