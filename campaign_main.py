@@ -20,9 +20,10 @@ def run_curing_experiment(trials, network, startvotes, params):
     # dict to hold superurn ratios over time
     strats = params["strats"]
     results = {strats[strat_id]:{} for strat_id in strats}
-
+    
     # run specified no. trials for each strategy
     for strat_id in strats:
+        
         for trial in range(1, trials+1):
 
             # reset initial conditions
@@ -46,11 +47,12 @@ def run_curing_experiment(trials, network, startvotes, params):
                 case 5:
                      results[strats[strat_id]][trial] = ci_vinjection(network, params)
                 case 6:
-                    pass
+                    results[strats[strat_id]][trial] = pop_vinjection(network, params)
                 case 7:
-                    pass
+                    results[strats[strat_id]][trial] = besu_vinjection(network, params)
                 case 8:
-                    pass
+                    results[strats[strat_id]][trial] = besupopci_vinjection(network, params)
+
 
             print("Trial", trial, "complete.")
         print("Strategy", strat_id, "complete.")
@@ -96,14 +98,14 @@ if __name__ == "__main__":
     timesteps = 200
     trials = 10
     strats = { 
-        1 : "Uniform Allocation via Delta",
-        2 : "Population-Weighted via Delta",                       
-        3 : "Centrality-Infection via Delta",
-        4 : "Population-Weighted Centrality Infection via Delta",
-        5 : "Centrality-Infection via Injection vs. Uniform"
-        #6 : "",
-        #7 : "",
-        #8 : ""
+        #1 : "Uniform Allocation via Delta",
+        #2 : "Population-Weighted via Delta",                       
+        #3 : "Centrality-Infection via Delta",
+        #4 : "Population-Weighted Centrality Infection via Delta",
+        5 : "Centrality-Infection via Injection vs. Uniform",
+        6 : "Population-Weighted Injection vs. Uniform",
+        7 : "Binary Entropy Injection vs. Uniform",
+        8 : "Binary Entropy Centrality Population Injection vs. Uniform"
     }
 
     #---------------------------------------------------------------

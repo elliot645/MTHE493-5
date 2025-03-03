@@ -1,5 +1,6 @@
 from utils.graph_utils import *
-import random
+import random, math
+
 
 #--------------------------------------------------------------------------
 # Classical Polya Process
@@ -277,3 +278,137 @@ def ci_vinjection(network, params):
         results[t] = network.update_superurn_ratios(player)
 
     return results
+def binary_entropy(p):
+    if 0 < p and p < 1:
+        return p*math.log2(p) + (1-p)*math.log2(1-p)
+    else:
+        return 0
+
+        
+def besu_vinjection(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+
+    for t in range(1, timesteps+1):
+        # get CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom += binary_entropy(node.suratio)
+        #sum of binary entropy function  
+        for node in network:
+            #Inject balls blue and red balls
+        
+            # Run normal polya process
+            if player == "red":
+                node.red += rbudget * binary_entropy(node.suratio) / denom
+                node.blue += bbudget / network.num_nodes()
+                prob_red = node.suratio
+            else:
+                node.red += rbudget / network.num_nodes()
+                node.blue += bbudget * binary_entropy(node.suratio) / denom
+                prob_red = 1 - node.suratio
+
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta 
+            else:
+                node.blue += delta
+
+        # calculate infection rate
+        results[t] = network.update_superurn_ratios(player)
+
+    return results
+
+
+def pop_vinjection(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+
+    for t in range(1, timesteps+1):
+        # get CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom +=  (node.red+node.blue)
+        #sum of binary entropy function  
+        for node in network:
+            #Inject balls blue and red balls
+        
+            # Run normal polya process
+            if player == "red":
+                node.red += rbudget *(node.red+node.blue) / denom
+                node.blue += bbudget / network.num_nodes()
+                prob_red = node.suratio
+            else:
+                node.red += rbudget / network.num_nodes()
+                node.blue += bbudget * (node.red+node.blue)/ denom
+                prob_red = 1 - node.suratio
+
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta 
+            else:
+                node.blue += delta
+
+        # calculate infection rate
+        results[t] = network.update_superurn_ratios(player)
+
+    return results
+
+def besupopci_vinjection(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+
+    for t in range(1, timesteps+1):
+        # get CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom += binary_entropy(node.suratio) * node.degree*node.centrality*(1-node.ratio) * (node.red+node.blue)
+        #sum of binary entropy function  
+        for node in network:
+            #Inject balls blue and red balls
+        
+            # Run normal polya process
+            if player == "red":
+                node.red += rbudget * binary_entropy(node.suratio) * node.degree*node.centrality*(1-node.ratio) * (node.red+node.blue) / denom
+                node.blue += bbudget / network.num_nodes()
+                prob_red = node.suratio
+            else:
+                node.red += rbudget / network.num_nodes()
+                node.blue += bbudget * binary_entropy(node.suratio) * node.degree*node.centrality*(1-node.ratio) * (node.red+node.blue)/ denom
+                prob_red = 1 - node.suratio
+
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta 
+            else:
+                node.blue += delta
+
+        # calculate infection rate
+        results[t] = network.update_superurn_ratios(player)
+
+    return results
+
