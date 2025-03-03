@@ -98,10 +98,10 @@ if __name__ == "__main__":
     timesteps = 200
     trials = 10
     strats = { 
-        #1 : "Uniform Allocation via Delta",
-        #2 : "Population-Weighted via Delta",                       
-        #3 : "Centrality-Infection via Delta",
-        #4 : "Population-Weighted Centrality Infection via Delta",
+        1 : "Uniform Allocation via Delta",
+        2 : "Population-Weighted via Delta",                       
+        3 : "Centrality-Infection via Delta",
+        4 : "Population-Weighted Centrality Infection via Delta",
         5 : "Centrality-Infection via Injection vs. Uniform",
         6 : "Population-Weighted Injection vs. Uniform",
         7 : "Binary Entropy Injection vs. Uniform",
