@@ -7,7 +7,6 @@ TO-DO:
 - fill adjacency gaps in AK, HI, SD
     - debug centrality for AK, DC, HI, MD, MO, NV, VA
 - convert voting data to JSON
-- plot results in main rather than write to excel
 - MAKE PASSIVE PLAYER USE POPULATION-WEIGHTED 
 """
 
@@ -15,7 +14,7 @@ TO-DO:
 # Function to run numerous trials and track results: 
 #--------------------------------------------------------------
 
-def run_curing_experiment(trials, network, startvotes, params):
+def run_campaigns(trials, network, startvotes, params):
     # dict to track opinion over time for each strategy
     strats = params["strats"]
     results = {strats[strat_id]:{} for strat_id in strats}
@@ -92,10 +91,10 @@ if __name__ == "__main__":
                         # Don't use AK, DC, HI, MD, MO, NV, or VA - missing centrality 
     start_year = 2004   # Note: 2020 is missing data
     player = "blue"     # "blue" or "red"
-    rbudget = 1000000
-    bbudget = 1000000
-    delta = 1
-    timesteps = 200
+    rbudget = 100000
+    bbudget = 100000
+    delta = 10
+    timesteps = 500
     trials = 50
     reinforcement_strats = {
         1 : "Uniform",
@@ -107,8 +106,8 @@ if __name__ == "__main__":
         5 : "Uniform",
         6 : "Population-Weighted",
         7 : "CIR-Weighted",
-        8 : "Pop-CIR-Weighted"
-        # 9 : "BE-Weighted",
+        8 : "Pop-CIR-Weighted",
+        9 : "BE-Weighted"
         # 10 : "BE-CIR-Population-Weighted"   
     }
 
@@ -143,8 +142,20 @@ if __name__ == "__main__":
     #---------------------------------------------------------------
 
     # Run specified number of curing trials for given parameters
-    output = run_curing_experiment(trials, network, startvotes, params)
-    print_curing_results(output, results_path)
+    results = run_campaigns(trials, network, startvotes, params)
+
+    # Plot results
+    for strat in results:
+        xvals = []
+        yvals = []
+        for t in results[strat]:
+            xvals.append(t)
+            yvals.append(results[strat][t])
+        plt.plot(xvals, yvals, label=strat)
+    plt.legend()
+    plt.show()
+
+    
 
         
 

@@ -235,7 +235,7 @@ def uniform_vinjection(network, params):
         results[t] = network.update_superurn_ratios(player)
     return results
 
-# population-weighted vs. uniform
+# Population-weighted vs. uniform
 def pop_vinjection(network, params):
     # unbox params
     player = params["player"]
@@ -320,7 +320,7 @@ def ci_vinjection(network, params):
         results[t] = network.update_superurn_ratios(player)
     return results
 
-# population- and CIR-weighted vs. uniform
+# Population- and CIR-weighted vs. uniform
 def pop_ci_vinjection(network, params):
     # unbox params
     player = params["player"]
@@ -367,7 +367,7 @@ def pop_ci_vinjection(network, params):
         results[t] = network.update_superurn_ratios(player)
     return results
         
-# binary entropy (of superurn?) vs. uniform 
+# Binary entropy (of superurn) vs. uniform 
 def besu_vinjection(network, params):
     # unbox params
     player = params["player"]
@@ -389,8 +389,8 @@ def besu_vinjection(network, params):
                 node.red += rbudget*(binary_entropy(node.suratio)/denom)
                 node.blue += bbudget / network.num_nodes()
             if player == "blue":
-                node.red = rbudget / network.num_nodes()
-                node.blue = bbudget*(binary_entropy(node.suratio)/denom)
+                node.red += rbudget / network.num_nodes()
+                node.blue += bbudget*(binary_entropy(node.suratio)/denom)
         # update superurn ratios
         network.update_superurn_ratios(player)
         # perform polya process at this timestep
@@ -409,7 +409,7 @@ def besu_vinjection(network, params):
         results[t] = network.update_superurn_ratios(player)
     return results
 
-# binary entropy (by superurn?) population- and CI-weighted vs uniform
+# Binary entropy (of superurn)-, population-, and CI-weighted vs uniform
 def besupopci_vinjection(network, params):
     # unbox params
     player = params["player"]
