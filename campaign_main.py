@@ -16,16 +16,13 @@ TO-DO:
 #--------------------------------------------------------------
 
 def run_curing_experiment(trials, network, startvotes, params):
-
-    # dict to hold superurn ratios over time
+    # dict to track opinion over time for each strategy
     strats = params["strats"]
     results = {strats[strat_id]:{} for strat_id in strats}
-    
+
     # run specified no. trials for each strategy
     for strat_id in strats:
-        
         for trial in range(1, trials+1):
-
             # reset initial conditions
             for node in network:
                 r = startvotes[node.id]["REPUBLICAN"]
@@ -33,9 +30,9 @@ def run_curing_experiment(trials, network, startvotes, params):
                 node.red = r
                 node.blue = b
                 node.pop = r + b
-                
             # perform campaign
             match strat_id:
+                # reinforcement strategies 
                 case 1:
                     results[strats[strat_id]][trial] = uniform_vdelta(network, params) 
                 case 2:
@@ -44,31 +41,33 @@ def run_curing_experiment(trials, network, startvotes, params):
                     results[strats[strat_id]][trial] = ci_vdelta(network, params)
                 case 4:
                     results[strats[strat_id]][trial] = pop_ci_vdelta(network, params)
+                # injection strategies
                 case 5:
-                     results[strats[strat_id]][trial] = ci_vinjection(network, params)
+                    results[strats[strat_id]][trial] = uniform_vinjection(network, params)
                 case 6:
                     results[strats[strat_id]][trial] = pop_vinjection(network, params)
                 case 7:
-                    results[strats[strat_id]][trial] = besu_vinjection(network, params)
+                    results[strats[strat_id]][trial] = ci_vinjection(network, params)
                 case 8:
+                    results[strats[strat_id]][trial] = pop_ci_vinjection(network, params)
+                case 9:
+                    results[strats[strat_id]][trial] = besu_vinjection(network, params)
+                case 10:
                     results[strats[strat_id]][trial] = besupopci_vinjection(network, params)
-
-
             print("Trial", trial, "complete.")
         print("Strategy", strat_id, "complete.")
 
-    # average the superurn ratio over all trials
+    # get avg opinion at time t over all trials
     output = {strat:{} for strat in results}
     for strat in results:
         for t in range(0, params["timesteps"]+1):
             sum = 0
             count = 0
             for trial in results[strat]:
-                sum += results[strat][trial][t]
+                sum += results[strat][trial][t] 
                 count += 1
             avg = sum / count
             output[strat][t] = avg
-
     return output 
 
 #--------------------------------------------------------------
@@ -85,47 +84,60 @@ if __name__ == "__main__":
     centrality_path = r"data\centrality_US.json"
     results_path = r"data\results.xlsx"
 
-    #===========================
+    #==============================================================
     # SET TRIAL PARAMETERS HERE
-    #===========================
+    #==============================================================
 
-    state = "NY"        # state=None --> whole country
-    """Do not use AK, DC, HI, MD, MO, NV, or VA for now - missing centrality"""
-    start_year = 2000   # Note: 2020 is missing data
-    player = "blue" # "blue" or "red"
-    rbudget = 100000
-    bbudget = 100000
+    state = "NJ"        # state=None --> whole country
+                        # Don't use AK, DC, HI, MD, MO, NV, or VA - missing centrality 
+    start_year = 2004   # Note: 2020 is missing data
+    player = "blue"     # "blue" or "red"
+    rbudget = 1000000
+    bbudget = 1000000
+    delta = 1
     timesteps = 200
-    trials = 10
-    strats = { 
-        1 : "Uniform Allocation via Delta",
-        2 : "Population-Weighted via Delta",                       
-        3 : "Centrality-Infection via Delta",
-        4 : "Population-Weighted Centrality Infection via Delta",
-        5 : "Centrality-Infection via Injection vs. Uniform",
-        6 : "Population-Weighted Injection vs. Uniform",
-        7 : "Binary Entropy Injection vs. Uniform",
-        8 : "Binary Entropy Centrality Population Injection vs. Uniform"
+    trials = 50
+    reinforcement_strats = {
+        1 : "Uniform",
+        2 : "Population-Weighted",                       
+        3 : "CIR-Weighted",
+        4 : "Pop-CIR-Weighted"
+    }
+    injection_strats = { 
+        5 : "Uniform",
+        6 : "Population-Weighted",
+        7 : "CIR-Weighted",
+        8 : "Pop-CIR-Weighted"
+        # 9 : "BE-Weighted",
+        # 10 : "BE-CIR-Population-Weighted"   
     }
 
     #---------------------------------------------------------------
     
-    # The following parameters are fixed for all trials:
-    fipsdict = get_fipsdict(data_path, fips_sheet, state)    # Nodes
-    neighbours = get_adjacency_dict(adj_path, fipsdict)      # Edges
-    network = Graph()                                        #
-    network.set_topology(fipsdict, neighbours)               # Graph topology           
-    centrality = get_centrality_dict(centrality_path)        # 
-    network.set_centrality(centrality)                       # Node centrality 
-    vdf = get_df(data_path, votes_sheet)                     #
-    startvotes = get_votes(vdf, fipsdict, start_year, state) # Initial conditions  
-    params = {                                               # Game parameters:
-        "player" : player,                                   # Active player
-        "rbudget" : rbudget,                                 # Red's budget at each t
-        "bbudget" : bbudget,                                 # Blue's budget at each t
-        "timesteps" : timesteps,                             # No. timesteps to run sim
-        "strats" : strats,                                   # Strategies to run
-        "delta" : 50                                         # For injection strategies
+    # Get dict of viable nodes
+    fipsdict = get_fipsdict(data_path, fips_sheet, state)
+
+    # Get and set network topology
+    neighbours = get_adjacency_dict(adj_path, fipsdict)       
+    network = Graph()               
+    network.set_topology(fipsdict, neighbours)       
+
+    # Get and set node centrality                   
+    centrality = get_centrality_dict(centrality_path)        
+    network.set_centrality(centrality)      
+
+    # Get initial conditions (set during experiment)          
+    vdf = get_df(data_path, votes_sheet)                     
+    startvotes = get_votes(vdf, fipsdict, start_year, state) 
+
+    # Package trial parameters
+    params = {                                               
+        "player" : player,              # Active player
+        "rbudget" : rbudget,            # Red's budget at each timestep
+        "bbudget" : bbudget,            # Blue's budget at each timestep
+        "timesteps" : timesteps,        # No. timesteps to run sim
+        "strats" : injection_strats,    # Strategies to run
+        "delta" : delta                 # For injection strategies
     }   
 
     #---------------------------------------------------------------

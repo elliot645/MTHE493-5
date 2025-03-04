@@ -42,6 +42,7 @@ class Graph:
         print("Network topology constructed:", round((end-start)*1000), "ms")
         return 
 
+    # Set node centrality
     def set_centrality(self, centrality):
         for node in self:
             if len(str(node.id)) == 4:
@@ -55,21 +56,20 @@ class Graph:
                 print("No centrality for", node.id, node.name, node.state)
         return
 
-    # Update superurn ratios for each node; return's average urn ratio weighted by population
-    # Ratios calculated based on specified player
+    # Update ratios and superurn ratios for each node
+    #   - return's average urn ratio weighted by population
+    #   - ratios calculated based on specified player
     def update_superurn_ratios(self, player):
         sum = 0
         total_pop = 0
         for node in self:
             r = node.red
             b = node.blue
-
             # update node's ratio
             if player == "red":
                 node.ratio = r / (r+b)
             if player == "blue":
                 node.ratio = b / (r+b)
-
             # update node's superurn ratio
             for neighbour in node.neighbours:
                 r += self.nodes[neighbour].red
@@ -78,7 +78,6 @@ class Graph:
                 node.suratio = r / (r+b)
             if player == "blue":
                 node.suratio = b / (r+b)
-
             # calculate average ratio weighted by population
             sum += node.pop*node.ratio
             total_pop += node.pop
