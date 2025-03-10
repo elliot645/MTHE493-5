@@ -65,3 +65,31 @@ def plot_data(data, startyear, endyear, key):
     plt.title(startyear + "-" + endyear)
     plt.show()
     return
+
+
+# Plot approximated pdf of U
+def plot_empirical_pmf(votes, year):
+    frequency = {}
+    count = 0
+    for county in votes[year]:
+        # get r, b, and ratio
+        r = votes[year][county]["REPUBLICAN"]
+        b = votes[year][county]["DEMOCRAT"]
+        ratio = r/(r+b)
+        # get frequency of ratio (to nearest hundredth)
+        rratio = round(ratio, 2)
+        if rratio not in frequency:
+            frequency[rratio] = 1
+        else:
+            frequency[rratio] += 1
+        count += 1
+    # normalize to get p(u) 
+    p = {u:(frequency[u]/count) for u in frequency}
+    # plot empirical distribution
+    xemp = [u for u in p]
+    xemp.sort()
+    yemp = []
+    for u in xemp:
+        yemp.append(p[u])
+    plt.plot(xemp, yemp, label="Empirical")
+    return

@@ -76,39 +76,45 @@ def run_campaigns(trials, network, startvotes, params):
 if __name__ == "__main__":
 
     # Set filepaths 
-    data_path = r"data\countypres_clean.xlsx"
-    votes_sheet = "countypres"
-    fips_sheet = "fipslist"
-    adj_path = r"data\county_adjacency.csv"
-    centrality_path = r"data\centrality_US.json"
-    results_path = r"data\results.xlsx"
+    data_path = r'data\countypres_clean.xlsx'
+    votes_sheet = 'countypres'
+    fips_sheet = 'fipslist'
+    adj_path = r'data\county_adjacency.csv'
+    centrality_path = r'data\centrality_US.json'
+    results_path = r'data\results.xlsx'
 
     #==============================================================
     # SET TRIAL PARAMETERS HERE
     #==============================================================
 
-    state = "NJ"        # state=None --> whole country
+    state = 'CA'        # state=None --> whole country
                         # Don't use AK, DC, HI, MD, MO, NV, or VA - missing centrality 
-    start_year = 2004   # Note: 2020 is missing data
-    player = "blue"     # "blue" or "red"
+    start_year = 2008   # Note: 2020 is missing data
+    player = 'blue'     # 'blue' or 'red'
     rbudget = 100000
     bbudget = 100000
-    delta = 10
-    timesteps = 500
-    trials = 50
+    delta = 100
+    timesteps = 200
+    trials = 20
     reinforcement_strats = {
-        1 : "Uniform",
-        2 : "Population-Weighted",                       
-        3 : "CIR-Weighted",
-        4 : "Pop-CIR-Weighted"
+        1 : 'Uniform',
+        2 : 'Population-Weighted',                       
+        3 : 'CIR-Weighted',
+        4 : 'Pop-CIR-Weighted'
     }
     injection_strats = { 
-        5 : "Uniform",
-        6 : "Population-Weighted",
-        7 : "CIR-Weighted",
-        8 : "Pop-CIR-Weighted",
-        9 : "BE-Weighted"
+        5 : 'Uniform',
+        6 : 'Population-Weighted',
+        7 : 'CIR-Weighted',
+        8 : 'Pop-CIR-Weighted',
+        9 : 'BE-Weighted'
         # 10 : "BE-CIR-Population-Weighted"   
+    }
+    finite_mem_injection = {
+        5 : 'Uniform',
+        6 : 'Population-Weighted',
+        7 : 'CIR-Weighted',
+        8 : 'Pop-CIR-Weighted'
     }
 
     #---------------------------------------------------------------
@@ -131,12 +137,12 @@ if __name__ == "__main__":
 
     # Package trial parameters
     params = {                                               
-        "player" : player,              # Active player
-        "rbudget" : rbudget,            # Red's budget at each timestep
-        "bbudget" : bbudget,            # Blue's budget at each timestep
-        "timesteps" : timesteps,        # No. timesteps to run sim
-        "strats" : injection_strats,    # Strategies to run
-        "delta" : delta                 # For injection strategies
+        'player' : player,              # Active player
+        'rbudget' : rbudget,            # Red's budget at each timestep
+        'bbudget' : bbudget,            # Blue's budget at each timestep
+        'timesteps' : timesteps,        # No. timesteps to run sim
+        'strats' : injection_strats,    # Strategies to run
+        'delta' : delta                 # For injection strategies
     }   
 
     #---------------------------------------------------------------
@@ -153,6 +159,7 @@ if __name__ == "__main__":
             yvals.append(results[strat][t])
         plt.plot(xvals, yvals, label=strat)
     plt.legend()
+    plt.title(state + ', ' + str(start_year) + ': ' + player + ', ' + 'budget=' + str(bbudget) + ', ' + 'delta=' + str(delta))
     plt.show()
 
     

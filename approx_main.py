@@ -6,6 +6,25 @@ import scipy.integrate as integrate
 from scipy.stats import beta
 import pandas as pd
 
+"""
+Adjacency Network:                          (nationwide? statewide?)
+1. Plot map for delta = 1, 10, 100, 1000    (constant)
+2. Plot map for delta = 1/12*P_i            (node-dependent; population)  
+3. Plot map for delta = K*h_b(U_i,0)        (node-dependent; opinion)
+
+Social Network:
+1.
+2.
+3.
+
+Approximation:
+1. Calculate P(U=u) for a given year (and state?)
+2. Choose delta_i by fitting Beta(R_i/delta_i, B_i/delta_i) to P(U=u)
+3. 
+
+
+"""
+
 # Get total R and B
 def get_values(votes, year):
     R = 0
@@ -14,33 +33,6 @@ def get_values(votes, year):
         R += votes[year][county]["REPUBLICAN"]
         B += votes[year][county]["DEMOCRAT"]
     return R, B
-
-# Plot approximated pdf of U
-def plot_empirical_pmf(votes, year):
-    frequency = {}
-    count = 0
-    for county in votes[year]:
-        # get r, b, and ratio
-        r = votes[year][county]["REPUBLICAN"]
-        b = votes[year][county]["DEMOCRAT"]
-        ratio = r/(r+b)
-        # get frequency of ratio (to nearest hundredth)
-        rratio = round(ratio, 2)
-        if rratio not in frequency:
-            frequency[rratio] = 1
-        else:
-            frequency[rratio] += 1
-        count += 1
-    # normalize to get p(u) 
-    p = {u:(frequency[u]/count) for u in frequency}
-    # plot empirical distribution
-    xemp = [u for u in p]
-    xemp.sort()
-    yemp = []
-    for u in xemp:
-        yemp.append(p[u])
-    plt.plot(xemp, yemp, label="Empirical")
-    return
 
 def plot_weighted_empirical_pdf(votes, year):
     frequency = {}
@@ -68,6 +60,34 @@ def plot_weighted_empirical_pdf(votes, year):
         yemp.append(p[u])
     plt.plot(xemp, yemp, label="Empirical (Population-Weighted)")
     return
+
+def plot_total_weighted_empirical_pdf(votes):
+    frequency = {}
+    total_pop = 0
+    for year in votes:
+        for county in votes[year]:
+            if year != '2020':
+                # get r, b, and ratio
+                r = votes[year][county]["REPUBLICAN"]
+                b = votes[year][county]["DEMOCRAT"]
+                ratio = round((r/(r+b)), 2)
+                pop = r+b
+                # get frequency of ratio (to nearest hundredth)
+                if ratio not in frequency:
+                    frequency[ratio] = pop
+                else:
+                    frequency[ratio] += pop
+                total_pop += pop
+    # normalize to get p(u) 
+    p = {u:(frequency[u]/total_pop) for u in frequency}
+    # plot empirical distribution
+    xemp = [u for u in p]
+    xemp.sort()
+    yemp = []
+    for u in xemp:
+        yemp.append(p[u])
+    plt.plot(xemp, yemp, label="Empirical (Population-Weighted)")
+    return
     
 # Plot beta distribution of U
 def plot_beta_pmf(R, B, delta):
@@ -85,8 +105,13 @@ def plot_beta_pmf(R, B, delta):
 
 if __name__ == "__main__":
     
-    # votes_path = r"data\votingdata.json"
-    # votes = get_votesdict(votes_path)
+    votes_path = r"data\votingdata.json"
+    votes = get_votesdict(votes_path)
+
+    plot_total_weighted_empirical_pdf(votes)
+    for delta in [4000, 6000, 8000]:
+        plot_beta_pmf(24000, 12000, delta)
+    plt.show()
 
     # fignum = 0
     # for year in ['2000', '2004', '2008', '2012', '2016']:
@@ -106,29 +131,7 @@ if __name__ == "__main__":
     #     R, B = get_values(votes, year)
     #     print(year, format(R+B, ','))
 
-    #------------------------------------------------------------
 
-    # Set trial filepaths:
-    fips_path = ''
-    votes_path = ''
-    adj_path = '' 
-
-    # Set trial parameters:
-    model = ''
-    state = ''
-    startyear = ''
-    endyear = ''
-    timesteps = ''
-    trials = ''
-    
-    # Get real data
-        # plot initial map
-        # plot final map
-
-    # Run model
-        # Plot initial  map
-        # Plot final map
-        # Plot avg error
 
 
 
