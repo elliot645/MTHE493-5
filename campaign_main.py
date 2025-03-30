@@ -80,7 +80,6 @@ if __name__ == "__main__":
     centrality_path = r'data\centrality.json'
     votes_path = r'data\votingdata.json'
     po_path = r'data\state_PO.json'
-    results_path = 'data/Campaign Results/Reinforcement/'
 
     # set up dicts
     fipsdict = get_dict_from_json(fips_path)
@@ -102,10 +101,8 @@ if __name__ == "__main__":
     #======================================
 
     # define parameters
-    player = 'red'
-
-    draws = 10
-    trials = 1
+    draws = 100
+    trials = 50
     rbudget = 10000
     bbudget = 10000
     delta = 100
@@ -132,52 +129,56 @@ if __name__ == "__main__":
         13 : 'Population-Weighted',
         14 : 'CIR-Weighted',
         15 : 'Pop-CIR-Weighted'
-    }
-
-    # package parameters for passing into functions
-    params = {                                              
-        'player' : player,              
-        'rbudget' : rbudget,           
-        'bbudget' : bbudget,            
-        'timesteps' : draws,   
-        'delta' : delta,         
-        'strats' : reinforcement_strats  # SWITCH CAMPAIGN HERE  
-    }   
+    } 
 
     #======================================
     # GET RESULTS HERE
     #======================================
 
-    # for each year:
-    # for startyear in ['2000', '2004', '2008', '2012', '2016']:
-    for startyear in ['2000']:
-        params['startyear'] = startyear
-        # for each state: 
-        for state in graphs:
-            network = graphs[state]
+    # set filepath and strategies to use
+    results_path = 'data/Campaign Results/Injection/PDF/'
+    params = {   
+        'strats' : injection_strats,  # SWITCH CAMPAIGN HERE  
+        'timesteps' : draws,                                                          
+        'rbudget' : rbudget,           
+        'bbudget' : bbudget,            
+        'delta' : delta     
+    }  
 
-            # run multiple trials of each strategy
-            results = run_campaign(network, params, trials, votesdict)
-            
-            # add a line for each strategy
-            for strat in results:
-                xvals = []
-                yvals = []
-                for t in results[strat]:
-                    xvals.append(t)
-                    yvals.append(results[strat][t])
-                plt.plot(xvals, yvals, label=strat)
+    for player in ['red', 'blue']:
+        params['player'] = player
 
-            # label and title plot, then save
-            plt.legend()
-            plt.title(state + ', ' + startyear + ': ' + player.capitalize() + ' Player')
-            plt.savefig(results_path + state + '_' + player.capitalize() + '_' + startyear + '.pdf')
-            plt.clf()
+        for startyear in ['2000', '2004', '2008', '2012', '2016']:
+            params['startyear'] = startyear
 
-            print(state, 'complete.')
-        print(startyear, 'complete.')
+            for state in graphs:
+                network = graphs[state]
 
-        
+                # run multiple trials of each strategy
+                results = run_campaign(network, params, trials, votesdict)
+                
+                # plot each strategy on same figure
+                for strat in results:
+                    xvals = []
+                    yvals = []
+                    for t in results[strat]:
+                        xvals.append(t)
+                        yvals.append(results[strat][t])
+                    plt.plot(xvals, yvals, label=strat)
+
+                # label and title figure, then save
+                plt.legend()
+                plt.title(state + ', ' + startyear + ': ' + player.capitalize() + ' Player')
+                # plt.savefig(results_path + state + '_' + player.capitalize() + '_' + startyear)          # save as PNG
+                plt.savefig(results_path + state + '_' + player.capitalize() + '_' + startyear + '.pdf') # save as PDF
+
+                # clear figure for next state
+                plt.clf()
+
+                print(state, 'complete.')
+            print(startyear, 'complete.')
+        print(player, 'complete.')
+
 
 
 
