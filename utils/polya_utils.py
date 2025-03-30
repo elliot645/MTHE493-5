@@ -1,13 +1,13 @@
 from utils.graph_utils import *
 import random, math
 
+#==========================================================================
 
 def binary_entropy(p):
     if 0 < p and p < 1:
         return p*math.log2(p) + (1-p)*math.log2(1-p)
     else:
         return 0
-
 
 #==========================================================================
 # Classical Polya Process

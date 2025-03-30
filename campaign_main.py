@@ -2,13 +2,6 @@ from utils.data_utils import *
 from utils.graph_utils import *
 from utils.polya_utils import *
 
-"""
-TO-DO:
-- fill adjacency gaps in AK, HI, SD
-    - debug centrality for AK, DC, HI, MD, MO, NV, VA
-- convert voting data to JSON
-- MAKE PASSIVE PLAYER USE POPULATION-WEIGHTED 
-"""
 
 #--------------------------------------------------------------
 # Function to run numerous trials and track results: 

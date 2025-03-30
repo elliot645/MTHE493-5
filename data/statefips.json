@@ -68,48 +68,6 @@
         "1131": "WILCOX",
         "1133": "WINSTON"
     },
-    "AK": {
-        "2001": "DISTRICT 1",
-        "2002": "DISTRICT 2",
-        "2003": "DISTRICT 3",
-        "2004": "DISTRICT 4",
-        "2005": "DISTRICT 5",
-        "2006": "DISTRICT 6",
-        "2007": "DISTRICT 7",
-        "2008": "DISTRICT 8",
-        "2009": "DISTRICT 9",
-        "2010": "DISTRICT 10",
-        "2011": "DISTRICT 11",
-        "2012": "DISTRICT 12",
-        "2013": "DISTRICT 13",
-        "2014": "DISTRICT 14",
-        "2015": "DISTRICT 15",
-        "2016": "DISTRICT 16",
-        "2017": "DISTRICT 17",
-        "2018": "DISTRICT 18",
-        "2019": "DISTRICT 19",
-        "2020": "DISTRICT 20",
-        "2021": "DISTRICT 21",
-        "2022": "DISTRICT 22",
-        "2023": "DISTRICT 23",
-        "2024": "DISTRICT 24",
-        "2025": "DISTRICT 25",
-        "2026": "DISTRICT 26",
-        "2027": "DISTRICT 27",
-        "2028": "DISTRICT 28",
-        "2029": "DISTRICT 29",
-        "2030": "DISTRICT 30",
-        "2031": "DISTRICT 31",
-        "2032": "DISTRICT 32",
-        "2033": "DISTRICT 33",
-        "2034": "DISTRICT 34",
-        "2035": "DISTRICT 35",
-        "2036": "DISTRICT 36",
-        "2037": "DISTRICT 37",
-        "2038": "DISTRICT 38",
-        "2039": "DISTRICT 39",
-        "2040": "DISTRICT 40"
-    },
     "AZ": {
         "4001": "APACHE",
         "4003": "COCHISE",
@@ -344,9 +302,6 @@
         "10003": "NEW CASTLE",
         "10005": "SUSSEX"
     },
-    "DC": {
-        "11001": "DISTRICT OF COLUMBIA"
-    },
     "FL": {
         "12001": "ALACHUA",
         "12003": "BAKER",
@@ -576,12 +531,6 @@
         "13317": "WILKES",
         "13319": "WILKINSON",
         "13321": "WORTH"
-    },
-    "HI": {
-        "15001": "HAWAII",
-        "15003": "HONOLULU",
-        "15007": "KAUAI",
-        "15009": "MAUI"
     },
     "ID": {
         "16001": "ADA",
