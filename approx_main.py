@@ -1,6 +1,6 @@
-from report_utils.graph_utils import *
-from report_utils.polya_utils import *
-from report_utils.approx_utils import *
+from utils.graph_utils import *
+from utils.polya_utils import *
+from utils.approx_utils import *
 import json
 import pandas as pd
 import networkx as nx

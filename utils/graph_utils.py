@@ -29,31 +29,18 @@ class Graph:
     def num_nodes(self):
         return len(self.nodes)
     
-    # Add nodes and edges to graph
-    def set_topology(self, fipsdict, neighbours):
-        start = time.time()
-
-        for fips in fipsdict:
-            node = Node(fips, fipsdict[fips]["county"], fipsdict[fips]["state"], neighbours[fips])
-            self.nodes[node.id] = node
-            self.networkx.add_edges_from([(node.id,neighbour) for neighbour in node.neighbours])
-
-        end = time.time()
-        print("Network topology constructed:", round((end-start)*1000), "ms")
-        return 
-
-    # Set node centrality
-    def set_centrality(self, centrality):
+    # use with json files
+    def set_state_topology(self, state, fipsdict, adjdict):
+        for fips in fipsdict[state]:
+            node = Node(fips, fipsdict[state][fips], state, adjdict[state][fips])
+            self.nodes[fips] = node
+            self.networkx.add_edges_from([(fips, neighbour) for neighbour in node.neighbours])
+        return
+    
+    # use with json files
+    def set_state_centrality(self, state, centralitydict):
         for node in self:
-            if len(str(node.id)) == 4:
-                id_string = "0" + str(node.id)
-            else:
-                id_string = str(node.id)
-            if id_string in centrality:
-                node.centrality = centrality[id_string]
-            else:
-                node.centrality = 0.000001
-                print("No centrality for", node.id, node.name, node.state)
+            node.centrality = centralitydict[state][node.id]
         return
 
     # Update ratios and superurn ratios for each node
@@ -85,9 +72,10 @@ class Graph:
         return avg_ratio
     
     # Visualize network
-    def visualize_graph(self):
+    def visualize_graph(self, state):
         plt.figure()
         nx.draw_spring(self.networkx, with_labels=True)
+        plt.title(state)
         plt.show()
         return
 
