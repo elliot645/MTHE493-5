@@ -459,3 +459,346 @@ def besupopci_vinjection(network, params):
 #==========================================================================
 # Finite Memory Injection
 #==========================================================================
+
+#Mem 1 Strategies
+def uniform_vinjection_m1(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params["delta"]
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+    # begin polya process
+    for t in range(1, timesteps+1):
+        # perform injection
+        for node in network:
+            node.addred = rbudget / network.num_nodes()
+            node.red += node.addred
+            node.addblue = bbudget / network.num_nodes()
+            node.blue += node.addblue
+        # update superurn ratios
+        network.update_superurn_ratios(player)
+        # perform polya process
+        for node in network:
+            # calculate draw probability
+            if player == "red":
+                prob_red = node.suratio
+            if player == "blue":
+                prob_red = 1 - node.suratio
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta - node.addred
+                node.blue -= node.addblue
+            else:
+                node.blue += delta - node.addblue
+                node.red -= node.addred
+        # calculate average urn ratio at this timestep
+        results[t] = network.update_superurn_ratios(player)
+    return results
+
+# population-weighted vs. uniform
+def pop_vinjection_m1(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+    # get total population
+    total_pop = 0
+    for node in network:
+        total_pop += node.pop
+    # begin polya process
+    for t in range(1, timesteps+1):
+        # perform injection
+        for node in network:
+            if player == "red":
+                node.addred = (node.pop/total_pop)*rbudget
+                node.red += node.addred
+                node.addblue = bbudget / network.num_nodes()
+                node.blue += node.addblue
+            if player == "blue":
+                node.addred = rbudget/network.num_nodes()
+                node.red += node.addred
+                node.addblue = (node.pop/total_pop)*bbudget
+                node.blue += node.addblue
+        # update urn and superurn ratios
+        network.update_superurn_ratios(player)
+        # perform polya process
+        for node in network:
+            # calculate draw probability
+            if player == "red":
+                prob_red = node.suratio
+            if player == "blue":
+                prob_red = 1 - node.suratio
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta - node.addred
+                node.blue -= node.addblue
+            else:
+                node.blue += delta - node.addblue
+                node.red -= node.addred
+        # calculate average urn ratio at this timestep
+        results[t] = network.update_superurn_ratios(player)
+    return results
+
+# CIR-weighted vs. uniform injection
+def ci_vinjection_m1(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+    # calculate initial ratios
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+    for t in range(1, timesteps+1):
+        # get CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom += node.degree*node.centrality*(1-node.ratio)
+        # perform injection
+        for node in network:
+            if player == "red":
+                node.addred = (rbudget*node.degree*node.centrality*(1-node.ratio)) / denom
+                node.red += node.addred
+                node.addblue = bbudget / network.num_nodes()
+                node.blue += node.addblue
+            if player == "blue":    
+                node.addred = rbudget / network.num_nodes()
+                node.red += node.addred
+                node.addblue = (bbudget*node.degree*node.centrality*(1-node.ratio)) / denom
+                node.blue += node.addblue
+        # update superurn ratios
+        network.update_superurn_ratios(player)
+        # perform polya process 
+        for node in network:
+            # calculate draw probability
+            if player == "red":
+                prob_red = node.suratio
+            if player == "blue":
+                prob_red = 1 - node.suratio 
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta - node.addred
+                node.blue -= node.addblue
+            else:
+                node.blue += delta - node.addblue
+                node.red -= node.addred
+        # calculate average urn ratio at this timestep
+        results[t] = network.update_superurn_ratios(player)
+    return results
+
+# population- and CIR-weighted vs. uniform
+def pop_ci_vinjection_m1(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+    # calculate initial ratios
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+    # calculate total population
+    total_pop = 0
+    for node in network:
+        total_pop += node.pop
+    # begin polya process
+    for t in range(1, timesteps+1):
+        # get pop-CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom += node.pop*node.degree*node.centrality*(1-node.ratio)
+        # perform injection at this timestep
+        for node in network:
+            if player == "red":
+                node.addred = (rbudget*node.pop*node.degree*node.centrality*(1-node.ratio)) / denom
+                node.red += node.addred
+                node.addblue = bbudget / network.num_nodes()
+                node.blue += node.addblue
+            if player == "blue":    
+                node.addred = rbudget / network.num_nodes()
+                node.red += node.addred
+                node.addblue = (bbudget*node.pop*node.degree*node.centrality*(1-node.ratio)) / denom
+                node.blue += node.addblue
+        # update superurn ratios
+        network.update_superurn_ratios(player)
+        # perform polya at this timestep 
+        for node in network:
+            # calculate draw probability
+            if player == "red":
+                prob_red = node.suratio
+            if player == "blue":
+                prob_red = 1 - node.suratio 
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta - node.addred
+                node.blue -= node.addblue
+            else:
+                node.blue += delta - node.addblue
+                node.red -= node.addred
+        # calculate average urn ratio at this timestep
+        results[t] = network.update_superurn_ratios(player)
+    return results
+        
+# binary entropy (of superurn?) vs. uniform 
+def besu_vinjection_m1(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+    # calculate initial infection rate
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+    for t in range(1, timesteps+1):
+        # get BE denominator at this timestep 
+        denom = 0
+        for node in network:
+            denom += log_regression_activator(1-node.ratio)
+        # perform injection
+        for node in network:
+            if player == "red":
+                node.addred = rbudget*(log_regression_activator(1-node.ratio)/denom)
+                node.red += node.addred
+                node.addblue = bbudget / network.num_nodes()
+                node.blue += node.addblue
+            if player == "blue":
+
+                node.addred = rbudget / network.num_nodes()
+                node.red += node.addred
+                node.addblue = bbudget*(log_regression_activator(1-node.ratio)/denom)
+                node.blue += node.addblue
+        # update superurn ratios
+        network.update_superurn_ratios(player)
+        # perform polya process at this timestep
+        for node in network:
+            # calculate draw probability
+            if player == "red":
+                prob_red = node.suratio
+            if player == "blue":
+                prob_red = 1 - node.suratio
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta - node.addred
+                node.blue -= node.addblue
+            else:
+                node.blue += delta - node.addblue
+                node.red -= node.addred
+        # calculate infection rate
+        results[t] = network.update_superurn_ratios(player)
+    return results
+
+# binary entropy (by superurn?) population- and CI-weighted vs uniform
+def bepopci_vinjection_m1(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+    # calculate initial ratios
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+    # get total population
+    total_pop = 0
+    for node in network:
+        total_pop += node.pop
+    # begin polya process
+    for t in range(1, timesteps+1):
+        # get BE-CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom += binary_entropy(node.ratio)*node.degree*node.centrality*(1-node.ratio)*(node.pop)
+        # perform injection at this timestep
+        for node in network:
+            if player == "red":
+                node.addred = (rbudget*binary_entropy(node.ratio)*node.degree*node.centrality*(1-node.ratio)*node.pop)/denom
+                node.red += node.addred
+                node.addblue = bbudget / network.num_nodes()
+                node.blue += node.addblue
+            if player == "blue":
+                node.addred = rbudget / network.num_nodes()
+                node.red += node.addred
+                node.addblue = (bbudget*binary_entropy(node.ratio)*node.degree*node.centrality*(1-node.ratio)*node.pop)/denom
+                node.blue += node.addblue
+        # update superurn ratios
+        network.update_superurn_ratios(player)
+        # perform polya process at this timestep
+        for node in network: 
+            # calculate draw probability
+            if player == "red":
+                prob_red = node.suratio
+            if player == "blue":
+                prob_red = 1 - node.suratio
+            #perform draw
+            if random.random() < prob_red:
+                node.red += delta - node.addred
+                node.blue -= node.addblue
+            else:
+                node.blue += delta - node.addblue
+                node.red -= node.addred
+        # calculate average urn ratio at this timestep
+        results[t] = network.update_superurn_ratios(player)
+    return results
+
+def bepop_vinjection_m1(network, params):
+    # unbox params
+    player = params["player"]
+    rbudget = params["rbudget"]
+    bbudget = params["bbudget"]
+    timesteps = params["timesteps"]
+    delta = params['delta']
+    # calculate initial ratios
+    results = {}
+    results[0] = network.update_superurn_ratios(player)
+    # get total population
+    total_pop = 0
+    for node in network:
+        total_pop += node.pop
+    # begin polya process
+    for t in range(1, timesteps+1):
+        # get BE-CIR denominator for this timestep
+        denom = 0
+        for node in network:
+            denom += binary_entropy(node.ratio)*(node.pop)
+        # perform injection at this timestep
+        for node in network:
+            if player == "red":
+                node.addred = (rbudget*binary_entropy(node.ratio)*node.pop)/denom
+                node.red += node.addred
+                node.addblue = bbudget / network.num_nodes()
+                node.blue += node.addblue
+            if player == "blue":
+                node.addred = rbudget / network.num_nodes()
+                node.red += node.addred
+                node.addblue = (bbudget*binary_entropy(node.ratio)*node.pop)/denom
+                node.blue += node.addblue
+        # update superurn ratios
+        network.update_superurn_ratios(player)
+        # perform polya process at this timestep
+        for node in network: 
+            # calculate draw probability
+            if player == "red":
+                prob_red = node.suratio
+            if player == "blue":
+                prob_red = 1 - node.suratio
+            # perform draw
+            if random.random() < prob_red:
+                node.red += delta - node.addred
+                node.blue -= node.addblue
+            else:
+                node.blue += delta - node.addblue
+                node.red -= node.addred
+        # calculate average urn ratio at this timestep
+        results[t] = network.update_superurn_ratios(player)
+    return results
