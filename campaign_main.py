@@ -136,9 +136,9 @@ if __name__ == "__main__":
     #======================================
 
     # set filepath and strategies to use
-    results_path = 'data/Campaign Results/Injection/PDF/'
+    results_path = 'data/Campaign Results/Injection/PDF/'   # SET OUTPUT PATH HERE
     params = {   
-        'strats' : injection_strats,  # SWITCH CAMPAIGN HERE  
+        'strats' : injection_strats,                        # SET STRATEGY TYPE HERE  
         'timesteps' : draws,                                                          
         'rbudget' : rbudget,           
         'bbudget' : bbudget,            
